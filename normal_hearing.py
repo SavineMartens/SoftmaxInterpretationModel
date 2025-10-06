@@ -10,7 +10,7 @@ import librosa
 # [ ] create pipeline
 # [ ] check if RT max in memory causes not to reach 100% accuracy
 
-
+frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced')
 
 def get_stimulus(data_dir, sound_name):
     """

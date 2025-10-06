@@ -56,8 +56,63 @@ def fix_lengths(masker_probe, masker):
 
 
 # Amplitude modulation
-frequency = 1500 # Hz
+carrier_frequency = 1500 # Hz
 modulation_frequency = 40 # Hz
+modulation_duration = 300e-3
+
+def create_AM_tone(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=0, Fs=44100, plot=False):
+    # create reference tone
+    reference_dB = 91 # [dB], amplitude of 1 seems to be 
+    amplitude_reference = 1 
+    reference_stimulus = create_sine(carrier_frequency, Fs, 200e-3, amplitude=amplitude_reference)
+    reference_stimulus = apply_gaussian_ramp(reference_stimulus, Fs)
+
+    # create unmodulated tone
+    unmodulated_dB = 65 # dB
+    t = np.linspace(0, sound_duration, int(sound_duration*Fs))
+    unmodulated_amplitude_dB_reduction =  unmodulated_dB -reference_dB 
+    unmodulated_amplitude = amplitude_reference*10**(unmodulated_amplitude_dB_reduction/20) # A = A_ref * 10 ^(dB/20)
+
+    # unmodulated_stimulus = create_sine(frequency, Fs, sound_duration, amplitude=unmodulated_amplitude)
+    # unmodulated_stimulus = apply_gaussian_ramp(unmodulated_stimulus, Fs)
+    unmodulated_stimulus = unmodulated_amplitude * np.sin(2 * np.pi * carrier_frequency * t)
+
+    # create modulated tone
+    modulation_depth = 1* 10**(modulation_dB/20) # m = 10^(dB/20)
+    starting_phase = -np.pi/2 # start at 0 amplitude
+    
+    modulation_stimulus = np.sin(2 * np.pi * modulation_frequency * t + starting_phase)
+    modulated_stimulus = (1 + modulation_depth * modulation_stimulus) * unmodulated_stimulus
+    
+    x=3
+
+    modulated_stimulus *= np.iinfo(np.int16).max
+
+    # concatenate with reference tone
+    modulated_stimulus = np.concatenate((modulated_stimulus, reference_stimulus))
+    unmodulated_stimulus = np.concatenate((unmodulated_stimulus, reference_stimulus))
+
+    t_full = np.linspace(0, len(modulated_stimulus)/Fs, len(modulated_stimulus))
+
+    audio_out_file_unmodulated = './sounds/AM/unmodulated_reference91_' + str(unmodulated_dB) +'.wav'
+    # audio_out_file = './sounds/AM/masker_reference91_' + str(masker_dB) + 'dB_probe_'+ str(probe_dB) +'dB.wav'
+    # masker_probe.export(audio_out_file, format="wav")
+    # masker.export(audio_out_file_masker, format="wav")
+
+    if plot:
+        plt.figure()
+        plt.plot(t_full, unmodulated_stimulus, label='unmodulated')
+        plt.plot(t_full, modulated_stimulus, label='modulated')
+        plt.xlim(0, 0.3)
+        plt.legend()
+        plt.title('Unmodulated (' + str(unmodulated_dB) + ' dB) and modulated (' + str(modulation_dB) + ' dB) tones at ' + str(carrier_frequency) + ' Hz')
+# 
+
+for dB in range(21):
+    modulation_dB = -3*dB
+    print(modulation_dB)
+    create_AM_tone(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=True)
+
 
 
 # Masker probe
@@ -141,9 +196,9 @@ def create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB, probe_
     masker_probe.export(audio_out_file, format="wav")
     masker.export(audio_out_file_masker, format="wav")
 
-for dB in range(21):
-    probe_dB = masker_dB - 3*dB
-    print(-3*dB, 'dB:', probe_dB, 'dB')
-    create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB=masker_dB, probe_dB=probe_dB, frequency=frequency, plot=True)
+# for dB in range(21):
+#     probe_dB = masker_dB - 3*dB
+#     print(-3*dB, 'dB:', probe_dB, 'dB')
+#     create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB=masker_dB, probe_dB=probe_dB, frequency=frequency, plot=True)
 
 plt.show()
