@@ -71,7 +71,7 @@ def create_neurogram(stim, plot_neurogram=False, n_trials=5):
         plt.colorbar()
     return ng
 
-for file in glob.glob('./sounds/MP/*.wav'):
+for file in sorted(glob.glob('./sounds/MP/*.wav')):
     sound_name = os.path.basename(file)
     print(f'Processing {sound_name}...')
     stim = get_stimulus_wo_reference('./sounds/MP', sound_name, timing_wo_reference=0.25)
