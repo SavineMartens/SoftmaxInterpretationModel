@@ -13,7 +13,7 @@ from utilities import *
 
 frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
 # use half for less computation
-frequencies_EH = frequencies_EH[::2]
+frequencies_EH = frequencies_EH[::8]
 
 
 def get_stimulus_wo_reference(data_dir, sound_name, timing_wo_reference=0.3):
@@ -50,9 +50,11 @@ def create_neurogram(stim, plot_neurogram=False, n_trials=5):
     ng = Neurogram(frequencies_EH, n_low=5, n_med=5, n_high=15) #  n_low=10, n_med=10, n_high=30
     Fs = 1e4
     ng.bin_width =1/Fs
-    print(f'Number of trials: {n_trials}, Bin width: {ng.bin_width*1e3} ms')
+    print(f'Number of trials: {n_trials}, Bin width: {ng.bin_width*1e3} ms, number of fibers: {len(frequencies_EH)}')
     # Create neurogram output
-    ng.create(sound_wave=stim, species=Species.HUMAN_SHERA, n_trials=n_trials)    
+    print('Am I going to crash?')
+    ng.create(sound_wave=stim, species=Species.HUMAN_SHERA, n_trials=n_trials)   
+    print('I did not crash') 
     bin_ratio = Fs/5e3 # downsample to 5kHz
     output = ng.get_output() # 3D array: [fiber, trial, time]
     if plot_neurogram:
@@ -68,8 +70,11 @@ for file in glob.glob('./sounds/MP/*.wav'):
     sound_name = os.path.basename(file)
     print(f'Processing {sound_name}...')
     stim = get_stimulus_wo_reference('./sounds/MP', sound_name, timing_wo_reference=0.25)
-    ng = create_neurogram(stim, plot_neurogram=False, n_trials=1)
+    ng = create_neurogram(stim, plot_neurogram=True, n_trials=1)
     now = get_time_str(sec=False)
     num_fibers = len(frequencies_EH)
-    save_path = os.path.join('./data/neurograms/NH/MP/', now + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy'))
+    save_dir = './data/neurograms/NH/MP/'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    save_path = os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy'))
     save_neurogram(ng, save_path)
