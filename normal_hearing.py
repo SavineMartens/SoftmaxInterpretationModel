@@ -18,7 +18,7 @@ if platform.system() == 'Linux':
 
 frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
 # use half for less computation
-frequencies_EH = frequencies_EH[::8]
+# frequencies_EH = frequencies_EH[::8]
 
 
 def get_stimulus_wo_reference(data_dir, sound_name, timing_wo_reference=0.3):
@@ -39,7 +39,7 @@ def save_neurogram(ng, save_path):
     """
     if not os.path.exists(os.path.dirname(save_path)):
         os.makedirs(os.path.dirname(save_path))
-    np.save(save_path, ng.get_data())
+    np.save(save_path, ng.get_output())
     print(f'Neurogram saved to {save_path}')
 
 
@@ -78,8 +78,6 @@ for file in sorted(glob.glob('./sounds/MP/*.wav')):
     ng = create_neurogram(stim, plot_neurogram=True, n_trials=1)
     now = get_time_str(seconds=False)
     num_fibers = len(frequencies_EH)
-    save_dir = './data/neurograms/NH/MP/'
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    save_dir = './neurograms/NH/MP/'
     save_path = os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy'))
     save_neurogram(ng, save_path)
