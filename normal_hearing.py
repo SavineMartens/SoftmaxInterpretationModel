@@ -6,10 +6,15 @@ import os
 import glob
 import librosa
 from utilities import *
+import platform
 
 # To do
 # [ ] create pipeline
 # [ ] check if RT max in memory causes not to reach 100% accuracy
+
+if platform.system() == 'Linux':
+    import matplotlib
+    matplotlib.use('Agg') 
 
 frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
 # use half for less computation
