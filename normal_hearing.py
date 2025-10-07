@@ -52,7 +52,7 @@ def create_neurogram(stim, plot_neurogram=False, n_trials=5):
     # seed = np.random.randint(0, 100)
     # brucezilany.set_seed(seed)
     # np.random.seed(seed)
-    ng = Neurogram(frequencies_EH, n_low=5, n_med=5, n_high=15) #  n_low=10, n_med=10, n_high=30
+    ng = Neurogram(frequencies_EH, n_low=10, n_med=10, n_high=30) #  n_low=10, n_med=10, n_high=30
     Fs = 1e4
     ng.bin_width =1/Fs
     print(f'Number of trials: {n_trials}, Bin width: {ng.bin_width*1e3} ms, number of fibers: {len(frequencies_EH)}')
