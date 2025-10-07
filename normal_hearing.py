@@ -76,7 +76,7 @@ for file in sorted(glob.glob('./sounds/MP/*.wav')):
     print(f'Processing {sound_name}...')
     stim = get_stimulus_wo_reference('./sounds/MP', sound_name, timing_wo_reference=0.25)
     ng = create_neurogram(stim, plot_neurogram=True, n_trials=1)
-    now = get_time_str(sec=False)
+    now = get_time_str(seconds=False)
     num_fibers = len(frequencies_EH)
     save_dir = './data/neurograms/NH/MP/'
     if not os.path.exists(save_dir):
