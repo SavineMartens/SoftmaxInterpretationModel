@@ -108,10 +108,10 @@ def create_AM_tone(carrier_frequency=carrier_frequency, modulation_frequency=mod
         plt.title('Unmodulated (' + str(unmodulated_dB) + ' dB) and modulated (' + str(modulation_dB) + ' dB) tones at ' + str(carrier_frequency) + ' Hz')
 # 
 
-for dB in range(21):
-    modulation_dB = -3*dB
-    print(modulation_dB)
-    create_AM_tone(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=True)
+# for dB in range(21):
+#     modulation_dB = -3*dB
+#     print(modulation_dB)
+#     create_AM_tone(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=True)
 
 
 
@@ -153,11 +153,11 @@ def create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB, probe_
     # 'gap t between the probe-tone and the termination of the forward-masker to be meaningfully
     # specified, i.e., as the interval between the beginning of the forward- masker’s terminal
     # decline (ramping-down) and the peak of the probe-tone’s envelope.'
-    total_duration = 300 # ms
+    total_duration = 250 # ms
     masker_duration = 100 # ms
     duration_second_segment_masker = total_duration - masker_duration # ms
     duration_MPI = 100 # ms
-    duration_second_segment_probe = 90  # ms
+    duration_second_segment_probe = 40  # ms
 
     # create silence audio segments
     masker_probe_silent_segment = AudioSegment.silent(duration=duration_second_segment_probe, frame_rate=Fs)  #duration in milliseconds
@@ -196,9 +196,9 @@ def create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB, probe_
     masker_probe.export(audio_out_file, format="wav")
     masker.export(audio_out_file_masker, format="wav")
 
-# for dB in range(21):
-#     probe_dB = masker_dB - 3*dB
-#     print(-3*dB, 'dB:', probe_dB, 'dB')
-#     create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB=masker_dB, probe_dB=probe_dB, frequency=frequency, plot=True)
+for dB in range(21):
+    probe_dB = masker_dB - 3*dB
+    print(-3*dB, 'dB:', probe_dB, 'dB')
+    create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB=masker_dB, probe_dB=probe_dB, frequency=frequency, plot=True)
 
 plt.show()
