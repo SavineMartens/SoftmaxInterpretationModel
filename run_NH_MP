@@ -1,0 +1,45 @@
+#!/bin/bash
+
+submit_sbatch () { 
+cat << EOF > /exports/kno-shark/users/Savine/python/temporal/tmp_sbatch.sh
+#!/bin/bash 
+#SBATCH --job-name=Softmax_NH_MP
+#SBATCH --output=%x_%j.out 
+#SBATCH --mail-user="s.s.m.martens@lumc.nl" 
+#SBATCH --mail-type="ALL" 
+#SBATCH --mem=10G 
+#SBATCH --time=168:00:00 
+#SBATCH --partition=all 
+#SBATCH --ntasks=1 
+#SBATCH --cpus-per-task=2
+
+# load modules
+module purge 
+module load system/python/3.9.13 
+source /exports/kno-shark/users/Savine/python/SoftmaxInterpretationModel/softmax_venv/bin/activate 
+
+echo "[$SHELL] ## This is $SLURM_JOB_USER on $HOSTNAME and this job has the ID $SLURM_JOB_ID"
+# get the current working directory
+export CWD=$(pwd) 
+echo "[$SHELL] ## current working directory: "$CWD
+
+# Run the file
+python3 normal_hearing.py $1  
+
+echo "[$SHELL] ## Script finished" 
+
+EOF
+echo "sbatch /exports/kno-shark/users/Savine/python/temporal/tmp_sbatch.sh"
+#remove # if you want to submit the file
+sbatch /exports/kno-shark/users/Savine/python/temporal/tmp_sbatch.sh 
+rm /exports/kno-shark/users/Savine/python/temporal/tmp_sbatch.sh
+}
+
+for f in  /exports/kno-shark/users/Savine/python/SoftmaxInterpretationModel/sounds/MP/*wav
+    do 
+	echo $f 
+	submit_sbatch $f 
+done
+
+# run with:
+# $ ./example_submit
