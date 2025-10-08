@@ -94,7 +94,8 @@ if platform.system() == 'Linux':
     save_dir = './MP/NH/IR/'
     if not os.path.exists(os.path.dirname(save_dir)):
         os.makedirs(os.path.dirname(save_dir)) 
-    np.save(os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy' )), IR)
+    num_bands, _ = IR.shape
+    np.save(os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_IR_' + str(num_fibers) + 'CFs_' + str(num_bands) + 'bands.npy' )), IR)
 
 else:
     # use less, will otherwise not work on own pc
@@ -108,9 +109,10 @@ else:
     if not os.path.exists(os.path.dirname(save_dir)):
         os.makedirs(os.path.dirname(save_dir)) 
     sound_name = 'masker_reference91_65.wav'
-    now = get_time_str(seconds=False)
     num_fibers = len(frequencies_EH)
-    np.save(os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy' )), IR)
+    now = get_time_str(seconds=False)
+    num_bands, _ = IR.shape
+    np.save(os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_IR_' + str(num_fibers) + 'CFs_' + str(num_bands) + 'bands.npy' )), IR)
 
 
 

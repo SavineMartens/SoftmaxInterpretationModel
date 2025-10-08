@@ -54,9 +54,20 @@ except:
 # saving data to pandas
 dict_pd = dict(zip(sorted_x, sorted_y))
 dict_pd.update({"3AFCtype": 'memory_soft',
+                "fit" : y_sig if 'y_sig' in locals() else 'no_fit',
                 "temperature": temperature,
                 "sigma_SF": scaling_factor_sigma})
 dict_pd = pd.DataFrame(dict_pd.items())
 dict_pd = dict_pd.transpose()
 dict_pd.columns = dict_pd.iloc[0]
 dict_pd = dict_pd.drop(dict_pd.index[[0]])
+
+save_dir_figure = './output/MP/NH/figures/'
+save_dir_results = './output/MP/NH/results/'
+
+for folder in [save_dir_figure, save_dir_results]:
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+# plt.savefig(save_dir_figure + '/3AFC_memory_soft_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature) + '.png')            
+# np.save(save_dir_results + '/3AFC_memory_soft_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) + '.npy', dict)
