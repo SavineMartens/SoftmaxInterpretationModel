@@ -106,8 +106,8 @@ def compute_internal_representation(neurogram,
                                     num_critical_bands =42):
 
     dt = neurogram.bin_width
-    num_fibers, num_trials, num_samples = neurogram.get_data().shape
-    spike_matrix = neurogram.get_data().mean(axis=1) # average across trials
+    num_fibers, num_trials, num_samples = neurogram.get_output().shape
+    spike_matrix = neurogram.get_output().mean(axis=1) # average across trials
     # if still in 3 dimensions
     if len(spike_matrix.shape == 3):
         spike_matrix = np.squeeze(spike_matrix)
