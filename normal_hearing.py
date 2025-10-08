@@ -13,13 +13,17 @@ from Hamacher_utils import *
 # [ ] create pipeline
 # [ ] check if RT max in memory causes not to reach 100% accuracy
 
+
+frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
+
 if platform.system() == 'Linux':
     import matplotlib
     matplotlib.use('Agg') 
-
-frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
-# use half for less computation
-# frequencies_EH = frequencies_EH[::2]
+    # use less
+    frequencies_EH = frequencies_EH[::2]
+else:
+    # use less, will otherwise not work on own pc
+    frequencies_EH = frequencies_EH[::32]
 
 
 def get_stimulus_wo_reference(data_dir, sound_name, timing_wo_reference=0.3):
@@ -88,7 +92,8 @@ for file in sorted(glob.glob('./sounds/MP/*.wav')):
     save_path = os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy'))
     save_neurogram(ng, save_path)
     # get internal representations
-    IR = compute_internal_representation(ng)
+    IR = compute_internal_representation(ng, frequencies_EH)
+    # save IR
     save_dir = './MP/NH/IR/'
     if not os.path.exists(os.path.dirname(save_dir)):
         os.makedirs(os.path.dirname(save_dir)) 
