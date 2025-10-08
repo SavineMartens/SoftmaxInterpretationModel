@@ -9,6 +9,7 @@ from utilities import *
 # To do
 # [ ] check if RT max in memory causes not to reach 100% accuracy
 # [ ] plot IR!!!
+
 # parms
 scaling_factor_sigma = 0.2
 temperature = 20
@@ -40,6 +41,7 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
 
         # loop RT
         for f, file in enumerate(files):
+            print(file)
             IR_RT = np.load(file)
             dB = int(file[file.index('probe_') + len('probe_'): file.index('dB_IR')]) - 65
             dB_list.append(dB)
