@@ -191,14 +191,70 @@ def create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB, probe_
         print(len(masker.get_array_of_samples()))
 
     # Either save modified audio
-    audio_out_file_masker = './sounds/MP/masker_reference91_' + str(masker_dB) +'.wav'
-    audio_out_file = './sounds/MP/masker_reference91_' + str(masker_dB) + 'dB_probe_'+ str(probe_dB) +'dB.wav'
+    audio_out_file_masker = './sounds/MP/masker_reference91dB_' + str(masker_dB) +'.wav'
+    audio_out_file = './sounds/MP/masker_reference91dB_' + str(masker_dB) + 'dB_probe_'+ str(probe_dB) +'dB.wav'
+    masker_probe.export(audio_out_file, format="wav")
+    masker.export(audio_out_file_masker, format="wav")
+
+# for dB in range(21):
+#     probe_dB = masker_dB - 3*dB
+#     print(-3*dB, 'dB:', probe_dB, 'dB')
+#     create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB=masker_dB, probe_dB=probe_dB, frequency=frequency, plot=True)
+
+
+def create_varying_probe_amplitude_stimuli(probe_amplitude_dB_reduction, frequency, plot=False):
+    # Experiment Hamacher masker probe
+    amplitude_masker = 1 
+    reference_dB = 109.6 # [dB]
+
+    probe_amplitude = amplitude_masker*10**(probe_amplitude_dB_reduction/20) # A = A_ref * 10 ^(dB/20)
+    masker_fname = create_masker(amplitude=amplitude_masker)
+    probe_fname = create_probe(amplitude=probe_amplitude)
+
+    total_duration = 250 # ms
+    masker_duration = 100 # ms
+    duration_second_segment_masker = total_duration - masker_duration # ms
+    duration_MPI = 100 # ms
+    duration_second_segment_probe = 40  # ms
+
+    # create silence audio segments
+    masker_probe_silent_segment = AudioSegment.silent(duration=duration_second_segment_probe, frame_rate=Fs)  #duration in milliseconds
+    silent_MPI = AudioSegment.silent(duration=duration_MPI, frame_rate=Fs)  #duration in milliseconds
+    silent_segment_masker = AudioSegment.silent(duration=duration_second_segment_masker, frame_rate=Fs)  #duration in milliseconds
+
+    #read wav file to an audio segment
+    masker = AudioSegment.from_wav(masker_fname)
+    probe = AudioSegment.from_wav(probe_fname)
+
+    #Add above two audio segments    
+    masker_probe = masker + silent_MPI + probe + masker_probe_silent_segment 
+    masker = masker + silent_segment_masker 
+
+    if len(masker_probe.get_array_of_samples()) != len(masker.get_array_of_samples()):
+        masker_probe, masker = fix_lengths(masker_probe, masker)
+        print('After fixing lengths:')
+        print('length masker', len(masker.get_array_of_samples()))
+        print('length masker_probe', len(masker_probe.get_array_of_samples()))
+
+    if plot:
+        plt.figure()
+        plt.plot(np.linspace(0,len(masker_probe.get_array_of_samples())/44100, len(masker_probe.get_array_of_samples())), masker_probe.get_array_of_samples())
+        plt.plot(np.linspace(0,len(masker.get_array_of_samples())/44100, len(masker.get_array_of_samples())), masker.get_array_of_samples(), '--')
+        plt.title('Masker (full scale) +  probe reduction (' + str(probe_amplitude_dB_reduction) + 'dB)')
+        print(len(masker_probe.get_array_of_samples()))
+        print(len(masker.get_array_of_samples()))
+
+    # Either save modified audio
+    audio_out_file_masker = './sounds/MP/masker_reference1.wav'
+    audio_out_file = './sounds/MP/masker_reference1_probe_'+ str(probe_amplitude_dB_reduction) +'dB.wav'
     masker_probe.export(audio_out_file, format="wav")
     masker.export(audio_out_file_masker, format="wav")
 
 for dB in range(21):
-    probe_dB = masker_dB - 3*dB
-    print(-3*dB, 'dB:', probe_dB, 'dB')
-    create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB=masker_dB, probe_dB=probe_dB, frequency=frequency, plot=True)
+    probe_dB = - 3*dB
+    print('probe reduction:', -3*dB, 'dB' )
+    create_varying_probe_amplitude_stimuli(probe_amplitude_dB_reduction=probe_dB, frequency=frequency, plot=True)
+
+
 
 plt.show()
