@@ -3,6 +3,7 @@ softmax_venv/
 
 # large folders
 neurograms/
+MP/NH/neurograms/
 
 *out
 *slurm

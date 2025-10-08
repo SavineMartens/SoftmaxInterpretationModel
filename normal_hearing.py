@@ -23,7 +23,7 @@ if platform.system() == 'Linux':
     frequencies_EH = frequencies_EH[::2]
 else:
     # use less, will otherwise not work on own pc
-    frequencies_EH = frequencies_EH[::32]
+    frequencies_EH = frequencies_EH[::2]
 
 
 def get_stimulus_wo_reference(data_dir, sound_name, timing_wo_reference=0.3):
@@ -44,7 +44,7 @@ def save_neurogram(ng, save_path):
     """
     if not os.path.exists(os.path.dirname(save_path)):
         os.makedirs(os.path.dirname(save_path))
-    np.save(save_path, ng.get_output())
+    np.save(save_path, ng)
     print(f'Neurogram saved to {save_path}')
 
 
@@ -73,6 +73,10 @@ def create_neurogram(stim, plot_neurogram=False, n_trials=5):
         plt.colorbar()
     return ng
 
+# ng_file = './MP/NH/neurograms/2025-10-08_08h46_masker_reference91_65_neurogram_952CFs.npy'
+
+# ng = np.load(ng_file)
+# IR = compute_internal_representation(ng, frequencies_EH)
 
 
 

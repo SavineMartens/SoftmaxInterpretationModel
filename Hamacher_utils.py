@@ -115,6 +115,8 @@ def compute_internal_representation(neurogram,
     SR, _, _, edge_frequency_critical_bands = select_critical_bands(spike_matrix, fiber_frequencies, type=critical_band_type, num_critical_bands=num_critical_bands)
     num_remaining_crit_bands, num_samples = SR.shape
 
+    print(SR.shape)
+
     # downsample
     Fs_neurogram = 1/dt
     Fs_Hamacher = 5e3 # kHz
