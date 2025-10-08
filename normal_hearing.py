@@ -19,7 +19,7 @@ if platform.system() == 'Linux':
 
 frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
 # use half for less computation
-frequencies_EH = frequencies_EH[::2]
+# frequencies_EH = frequencies_EH[::2]
 
 
 def get_stimulus_wo_reference(data_dir, sound_name, timing_wo_reference=0.3):
