@@ -9,13 +9,11 @@ from sklearn.metrics import r2_score
 
 def apply_butter_LP_filter(spike_rate_matrix, binsize, cut_off_freq_Hz = 40, filter_order = 16 ):
     Fs = 1/binsize
-    nyq_freq = Fs/2
+    
     if len(spike_rate_matrix.shape) == 2:
         spike_rate_matrix_new = np.zeros(spike_rate_matrix.shape)
         for row in np.arange(spike_rate_matrix.shape[0]):
             signal_row = spike_rate_matrix[row,:]
-            # b, a = butter(filter_order, cut_off_freq, 'lowpass', analog=False)
-            # filtered_signal = filtfilt(b, a, signal_row, axis=0, padlen = None) #filtfilt to avoid phase delay
             sos = butter(filter_order, cut_off_freq_Hz, 'lp', fs=Fs, output='sos')
             filtered_signal = sosfiltfilt(sos, signal_row)
             # plotting
@@ -24,14 +22,6 @@ def apply_butter_LP_filter(spike_rate_matrix, binsize, cut_off_freq_Hz = 40, fil
             # plt.plot(filtered_signal, 'r')
             # plt.show()
             
-            # # Check frequency content of filtered signal
-            # from scipy import signal
-            # f, t, Sxx = signal.spectrogram(filtered_signal, Fs)
-            # plt.pcolormesh(t, f, Sxx, shading='gouraud')
-            # plt.colorbar()
-            # plt.xlabel('Time [s]')
-            # plt.ylabel('Frequency [Hz]')
-            # plt.title('Spectrogram of low pass filtered signal at: ' + str(cut_off_freq_Hz) + ' Hz')
 
             spike_rate_matrix_new[row, :] = filtered_signal
     else:
@@ -105,20 +95,34 @@ def select_critical_bands(spike_rate_matrix, fiber_frequencies, type='single', n
 
 
 def compute_internal_representation(neurogram, 
+                                    fiber_frequencies,
                                     tau_in = 70e-3, # 70 ms
                                     tau_out = 70e-3, # 70 ms
                                     TP2_cut_off_Hz = 2000,
                                     TP2_filter_order = 1,
                                     band_type = 'critical',
+                                    critical_band_type = 'entire_band', 
                                     plot_IR=False,
                                     num_critical_bands =42):
 
     dt = neurogram.bin_width
     num_fibers, num_trials, num_samples = neurogram.get_data().shape
     spike_matrix = neurogram.get_data().mean(axis=1) # average across trials
+    # if still in 3 dimensions
+    if len(spike_matrix.shape == 3):
+        spike_matrix = np.squeeze(spike_matrix)
 
     SR, _, _, edge_frequency_critical_bands = select_critical_bands(spike_matrix, fiber_frequencies, type=critical_band_type, num_critical_bands=num_critical_bands, number_of_fibers = number_of_fibers)
-    
+    num_remaining_crit_bands, num_samples = SR.shape
+
+    # downsample
+    Fs_neurogram = 1/dt
+    Fs_Hamacher = 5e3 # kHz
+    if Fs_Hamacher>Fs_neurogram:
+        raise ValueError('new Fs must be smaller than 100 000 Hz')
+    Fs_ratio = int(Fs_neurogram/Fs_Hamacher) # when new_Fs = 5000 --> same as Hamacher downsampling so same matrix as spike_matrix in matfile
+    SR = SR[:, ::Fs_ratio]
+
 
     t_unfiltered = np.arange(num_samples)*dt
     T_a = dt # sampling period
@@ -145,6 +149,8 @@ def compute_internal_representation(neurogram,
     x=3
     if plot_IR:
         plot_single_internal_representation(IR, t_unfiltered, edge_frequency_critical_bands)
+
+    return IR
 
 
 def get_Hamacher_NIR(IR, sigma):

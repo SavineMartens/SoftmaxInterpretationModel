@@ -7,6 +7,7 @@ import glob
 import librosa
 from utilities import *
 import platform
+from Hamacher_utils import *
 
 # To do
 # [ ] create pipeline
@@ -18,7 +19,7 @@ if platform.system() == 'Linux':
 
 frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
 # use half for less computation
-# frequencies_EH = frequencies_EH[::8]
+frequencies_EH = frequencies_EH[::2]
 
 
 def get_stimulus_wo_reference(data_dir, sound_name, timing_wo_reference=0.3):
@@ -47,7 +48,6 @@ def create_neurogram(stim, plot_neurogram=False, n_trials=5):
     """
     Create a Neurogram object based on the stimulus.
     """
-   
     # Create Neurogram instance
     # seed = np.random.randint(0, 100)
     # brucezilany.set_seed(seed)
@@ -57,9 +57,7 @@ def create_neurogram(stim, plot_neurogram=False, n_trials=5):
     ng.bin_width =1/Fs
     print(f'Number of trials: {n_trials}, Bin width: {ng.bin_width*1e3} ms, number of fibers: {len(frequencies_EH)}')
     # Create neurogram output
-    print('Am I going to crash?')
     ng.create(sound_wave=stim, species=Species.HUMAN_SHERA, n_trials=n_trials)   
-    print('I did not crash') 
     bin_ratio = Fs/5e3 # downsample to 5kHz
     output = ng.get_output() # 3D array: [fiber, trial, time]
     if plot_neurogram:
@@ -71,13 +69,31 @@ def create_neurogram(stim, plot_neurogram=False, n_trials=5):
         plt.colorbar()
     return ng
 
+
+
+
+
+
 for file in sorted(glob.glob('./sounds/MP/*.wav')):
     sound_name = os.path.basename(file)
     print(f'Processing {sound_name}...')
+    # get stimulus at correct dB
     stim = get_stimulus_wo_reference('./sounds/MP', sound_name, timing_wo_reference=0.25)
+    # creat neurogram
     ng = create_neurogram(stim, plot_neurogram=True, n_trials=1)
+    # saving neurogram
     now = get_time_str(seconds=False)
     num_fibers = len(frequencies_EH)
-    save_dir = './neurograms/NH/MP/'
+    save_dir = './MP/NH/neurograms/'
     save_path = os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy'))
     save_neurogram(ng, save_path)
+    # get internal representations
+    IR = compute_internal_representation(ng)
+    save_dir = './MP/NH/IR/'
+    if not os.path.exists(os.path.dirname(save_dir)):
+        os.makedirs(os.path.dirname(save_dir)) 
+    np.save(os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy' )), IR)
+
+
+
+    
