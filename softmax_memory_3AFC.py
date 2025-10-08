@@ -21,7 +21,8 @@ RT_max_name = glob.glob(os.path.join(dir_to_loop, '*masker_reference91_65dB_prob
 
 IR_R = np.load(R_name)
 IR_RT_max = np.load(RT_max_name)
-
+# S memory
+S = IR_RT_max - IR_R
 
 files = glob.glob(dir_to_loop + '*.npy')
 files.remove(R_name)
@@ -39,9 +40,6 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         # loop RT
         for f, file in enumerate(files):
             IR_RT = np.load(file)
-            # S memory
-            S = IR_RT - IR_R
-
             dB = int(file[file.index('probe_') + len('probe_'): file.index('dB_IR')]) - 65
             dB_list.append(dB)
             percentage_based_on_correlation_correct = iterate_3AFC_memory_softmax_correlation(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False, use_differences = True)           
@@ -55,7 +53,7 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         plt.xlim((min(dB_list)-1, max(dB_list)+1))
         plt.xlabel('dB', fontsize=20)
         plt.ylabel('Percentage correct [%]', fontsize=20)
-        plt.title('3AFC softmax, sigma_SF: ' + str(scaling_factor_sigma) + ', temp: ' + str(temperature), fontsize=20)
+        plt.title('3AFC memory softmax, sigma_SF: ' + str(scaling_factor_sigma) + ', temp: ' + str(temperature), fontsize=20)
 
 
         # fit sigmoid
@@ -77,8 +75,8 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         dict_pd.columns = dict_pd.iloc[0]
         dict_pd = dict_pd.drop(dict_pd.index[[0]])
 
-        save_dir_figure = './output/MP/NH/figures/softmax/'
-        save_dir_results = './output/MP/NH/results/softmax/'
+        save_dir_figure = './output/MP/NH/figures/softmax_memory'
+        save_dir_results = './output/MP/NH/results/softmax_memory'
 
         for folder in [save_dir_figure, save_dir_results]:
             if not os.path.exists(folder):

@@ -10,8 +10,8 @@ import platform
 from Hamacher_utils import *
 
 # To do
-# [ ] create pipeline
-# [ ] check if RT max in memory causes not to reach 100% accuracy
+# [X] create pipeline
+# [ ] implement without creating wav files with reference part
 
 
 frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')

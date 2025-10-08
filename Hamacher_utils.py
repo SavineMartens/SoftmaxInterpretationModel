@@ -305,7 +305,7 @@ def iterate_3AFC_memory_softmax_correlation(IR_RT, IR_R, S, sigma_w, temperature
 
         # Apply softmax formula
         expScores = np.exp(-score_matrix / temperature) #Using negative to invert the effect, lower MI -> higher score
-        probabilities[i,:] = np.nanmean(expScores / np.sum(expScores, axis=1, keepdims=True),axis=0)
+        probabilities[i,:] = 1 - (np.nanmean(expScores / np.sum(expScores, axis=1, keepdims=True),axis=0))
         x=3
 
     if plot_X:

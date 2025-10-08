@@ -4,6 +4,9 @@ softmax_venv/
 # large folders
 neurograms/
 MP/NH/neurograms/
+output/
 
 *out
 *slurm
+run_NH_MP
+run*
