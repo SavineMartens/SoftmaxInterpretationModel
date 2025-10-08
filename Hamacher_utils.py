@@ -94,16 +94,16 @@ def select_critical_bands(spike_rate_matrix, fiber_frequencies, type='single', n
     return selected_spikes, new_fiber_frequencies_CF, centre_remaining_frequency_bands, remaining_frequency_edges
 
 
-def compute_internal_representation(neurogram, 
-                                    fiber_frequencies,
-                                    tau_in = 70e-3, # 70 ms
-                                    tau_out = 70e-3, # 70 ms
-                                    TP2_cut_off_Hz = 2000,
-                                    TP2_filter_order = 1,
-                                    band_type = 'critical',
-                                    critical_band_type = 'entire_band', 
-                                    plot_IR=False,
-                                    num_critical_bands =42):
+def compute_internal_representation_from_object(neurogram, 
+                                                fiber_frequencies,
+                                                tau_in = 70e-3, # 70 ms
+                                                tau_out = 70e-3, # 70 ms
+                                                TP2_cut_off_Hz = 2000,
+                                                TP2_filter_order = 1,
+                                                band_type = 'critical',
+                                                critical_band_type = 'entire_band', 
+                                                plot_IR=False,
+                                                num_critical_bands =42):
 
     dt = neurogram.bin_width
     num_fibers, num_trials, num_samples = neurogram.get_output().shape
@@ -125,6 +125,65 @@ def compute_internal_representation(neurogram,
     Fs_ratio = int(Fs_neurogram/Fs_Hamacher) # when new_Fs = 5000 --> same as Hamacher downsampling so same matrix as spike_matrix in matfile
     SR = SR[:, ::Fs_ratio]
 
+
+    t_unfiltered = np.arange(num_samples)*dt
+    T_a = dt # sampling period
+    Z = np.zeros(SR.shape)
+    Y = np.zeros(SR.shape)
+    IR = np.zeros(SR.shape)
+    for n in range(num_remaining_crit_bands):
+        Z_nk = 0
+        for k in range(1,num_samples):
+            SR_nk = SR[n,k]
+            if SR_nk >=  Z_nk:
+                c1 = np.exp(-T_a/tau_in)
+                c2 = 1-c1
+            elif SR_nk < Z_nk:
+                c1 = np.exp(-T_a/tau_out)
+                c2 = 0
+            # Equation 8.6
+            Z_nk = c1*Z_nk + c2*SR_nk 
+            # Equation 8.5
+            Y[n,k] = max(SR_nk, Z_nk)
+            Z[n,k] = Z_nk
+    # TP2
+    IR = apply_butter_LP_filter(Y, T_a, cut_off_freq_Hz=TP2_cut_off_Hz, filter_order=TP2_filter_order)
+    x=3
+    if plot_IR:
+        plot_single_internal_representation(IR, t_unfiltered, edge_frequency_critical_bands)
+
+    return IR
+
+
+def compute_internal_representation_from_numpy(neurogram, 
+                                               Fs_neurogram,
+                                            fiber_frequencies,
+                                            tau_in = 70e-3, # 70 ms
+                                            tau_out = 70e-3, # 70 ms
+                                            TP2_cut_off_Hz = 2000,
+                                            TP2_filter_order = 1,
+                                            band_type = 'critical',
+                                            critical_band_type = 'entire_band', 
+                                            plot_IR=False,
+                                            num_critical_bands =42):
+
+    dt = 1/Fs_neurogram
+    num_fibers, num_trials, num_samples = neurogram.shape
+    spike_matrix = neurogram.mean(axis=1) # average across trials
+    # if still in 3 dimensions
+    if len(spike_matrix.shape) == 3:
+        spike_matrix = np.squeeze(spike_matrix)
+
+    SR, _, _, edge_frequency_critical_bands = select_critical_bands(spike_matrix, fiber_frequencies, type=critical_band_type, num_critical_bands=num_critical_bands)
+
+    # downsample
+    Fs_Hamacher = 5e3 # kHz
+    if Fs_Hamacher>Fs_neurogram:
+        raise ValueError('new Fs must be smaller than 100 000 Hz')
+    Fs_ratio = int(Fs_neurogram/Fs_Hamacher) # when new_Fs = 5000 --> same as Hamacher downsampling so same matrix as spike_matrix in matfile
+    SR = SR[:, ::Fs_ratio]
+
+    num_remaining_crit_bands, num_samples = SR.shape
 
     t_unfiltered = np.arange(num_samples)*dt
     T_a = dt # sampling period

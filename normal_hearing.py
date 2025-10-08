@@ -15,7 +15,7 @@ from Hamacher_utils import *
 
 
 frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
-
+Fs = 1e4
 
 
 
@@ -50,7 +50,6 @@ def create_neurogram(stim, plot_neurogram=False, n_trials=5):
     # brucezilany.set_seed(seed)
     # np.random.seed(seed)
     ng = Neurogram(frequencies_EH, n_low=10, n_med=10, n_high=30) #  n_low=10, n_med=10, n_high=30
-    Fs = 1e4
     ng.bin_width =1/Fs
     print(f'Number of trials: {n_trials}, Bin width: {ng.bin_width*1e3} ms, number of fibers: {len(frequencies_EH)}')
     # Create neurogram output
@@ -87,7 +86,7 @@ if platform.system() == 'Linux':
         save_path = os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy'))
         save_neurogram(ng, save_path)
         # get internal representations
-        IR = compute_internal_representation(ng, frequencies_EH)
+        IR = compute_internal_representation_from_object(ng, frequencies_EH)
         # save IR
         save_dir = './MP/NH/IR/'
         if not os.path.exists(os.path.dirname(save_dir)):
@@ -97,9 +96,18 @@ if platform.system() == 'Linux':
 else:
     # use less, will otherwise not work on own pc
     frequencies_EH = frequencies_EH[::2]
-    ng_file = './MP/NH/neurograms/2025-10-08_10_masker_reference91_65_neurogram_952CFs.npy'
+    ng_file = './MP/NH/neurograms/2025-10-08_10h26_masker_reference91_65_neurogram_952CFs.npy'
     ng = np.load(ng_file, allow_pickle=True)
-    IR = compute_internal_representation(ng, frequencies_EH)
+
+    IR = compute_internal_representation_from_numpy(ng, Fs, frequencies_EH)
+    # save IR
+    save_dir = './MP/NH/IR/'
+    if not os.path.exists(os.path.dirname(save_dir)):
+        os.makedirs(os.path.dirname(save_dir)) 
+    sound_name = 'masker_reference91_65.wav'
+    now = get_time_str(seconds=False)
+    num_fibers = len(frequencies_EH)
+    np.save(os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy' )), IR)
 
 
 
