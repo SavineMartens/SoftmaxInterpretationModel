@@ -37,7 +37,7 @@ def save_neurogram(ng, save_path):
     """
     if not os.path.exists(os.path.dirname(save_path)):
         os.makedirs(os.path.dirname(save_path))
-    np.save(save_path, ng, allow_pickle=True)
+    np.save(save_path, ng.get_output(), allow_pickle=True)
     print(f'Neurogram saved to {save_path}')
 
 
