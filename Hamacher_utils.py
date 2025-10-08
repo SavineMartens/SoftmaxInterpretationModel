@@ -111,11 +111,8 @@ def compute_internal_representation_from_object(neurogram,
     # if still in 3 dimensions
     if len(spike_matrix.shape) == 3:
         spike_matrix = np.squeeze(spike_matrix)
-
+    # to critical bands
     SR, _, _, edge_frequency_critical_bands = select_critical_bands(spike_matrix, fiber_frequencies, type=critical_band_type, num_critical_bands=num_critical_bands)
-    num_remaining_crit_bands, num_samples = SR.shape
-
-    print(SR.shape)
 
     # downsample
     Fs_neurogram = 1/dt
@@ -124,8 +121,8 @@ def compute_internal_representation_from_object(neurogram,
         raise ValueError('new Fs must be smaller than 100 000 Hz')
     Fs_ratio = int(Fs_neurogram/Fs_Hamacher) # when new_Fs = 5000 --> same as Hamacher downsampling so same matrix as spike_matrix in matfile
     SR = SR[:, ::Fs_ratio]
-
-
+    num_remaining_crit_bands, num_samples = SR.shape
+    
     t_unfiltered = np.arange(num_samples)*dt
     T_a = dt # sampling period
     Z = np.zeros(SR.shape)
