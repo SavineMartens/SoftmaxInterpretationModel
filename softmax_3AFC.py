@@ -13,8 +13,8 @@ temperature = 20
 dir_to_loop = './MP/NH/IR/*.npy'
 
 # get IR
-R_name = glob.glob(os.path.join(dir_to_loop, '*masker_reference91_65.npy'))[0]
-RT_max_name = glob.glob(os.path.join(dir_to_loop, '*masker_reference91_65dB_probe_65dB.py'))[0]
+R_name = glob.glob(os.path.join(dir_to_loop, '*masker_reference91_65_*.npy'))[0]
+RT_max_name = glob.glob(os.path.join(dir_to_loop, '*masker_reference91_65dB_probe_65dB*.py'))[0]
 
 IR_R = np.load(R_name)
 IR_RT_max = np.load(RT_max_name)
