@@ -112,7 +112,7 @@ def compute_internal_representation(neurogram,
     if len(spike_matrix.shape) == 3:
         spike_matrix = np.squeeze(spike_matrix)
 
-    SR, _, _, edge_frequency_critical_bands = select_critical_bands(spike_matrix, fiber_frequencies, type=critical_band_type, num_critical_bands=num_critical_bands, number_of_fibers = number_of_fibers)
+    SR, _, _, edge_frequency_critical_bands = select_critical_bands(spike_matrix, fiber_frequencies, type=critical_band_type, num_critical_bands=num_critical_bands)
     num_remaining_crit_bands, num_samples = SR.shape
 
     # downsample

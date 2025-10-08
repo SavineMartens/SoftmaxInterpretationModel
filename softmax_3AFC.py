@@ -28,7 +28,6 @@ files = glob.glob(dir_to_loop)
 for file in files:
     IR_RT = np.load(file)
 
-    dB = fname_RT[fname_RT.index('depth' + '_') + len('depth' + '_'): fname_RT.index('_duration')]
-
+    dB = int(file[file.index('probe_') + len('probe_'): file.index('dB.py')])
     iterate_3AFC_memory_softmax_correlation(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False, use_differences = True)
     
