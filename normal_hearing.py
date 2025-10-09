@@ -73,29 +73,33 @@ if platform.system() == 'Linux':
     # use less
     # frequencies_EH = frequencies_EH[::2]
     import sys
-    file = sys.argv[1]
+    # file = sys.argv[1]
     
-    # for file in sorted(glob.glob('./sounds/MP/*.wav')):
-    sound_name = os.path.basename(file)
-    print(f'Processing {sound_name}...')
-    # get stimulus at correct dB
-    stim = get_stimulus_wo_reference('./sounds/MP', sound_name, timing_wo_reference=0.25)
-    # creat neurogram
-    ng = create_neurogram(stim, plot_neurogram=True, n_trials=1)
-    # saving neurogram
-    now = get_time_str(seconds=False)
-    num_fibers = len(frequencies_EH)
-    save_dir = './MP/NH/neurograms/'
-    save_path = os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy'))
-    save_neurogram(ng, save_path)
-    # get internal representations
-    IR = compute_internal_representation_from_object(ng, frequencies_EH)
-    # save IR
-    save_dir = './MP/NH/IR/'
-    if not os.path.exists(os.path.dirname(save_dir)):
-        os.makedirs(os.path.dirname(save_dir)) 
-    num_bands, _ = IR.shape
-    np.save(os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_IR_' + str(num_fibers) + 'CFs_' + str(num_bands) + 'bands.npy' )), IR)
+    for file in sorted(glob.glob('./sounds/MP/*.wav')):
+        sound_name = os.path.basename(file)
+        print(f'Processing {sound_name}...')
+        # get stimulus at correct dB
+        stim = get_stimulus_wo_reference('./sounds/MP', sound_name, timing_wo_reference=0.25)
+        # creat neurogram
+        ng = create_neurogram(stim, plot_neurogram=True, n_trials=1)
+        # saving neurogram
+        now = get_time_str(seconds=False)
+        num_fibers = len(frequencies_EH)
+        save_dir = './MP/NH/neurograms/'
+        save_path = os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy'))
+        save_neurogram(ng, save_path)
+        # get internal representations
+        IR = compute_internal_representation_from_object(ng, frequencies_EH)
+        # save IR
+        save_dir = './MP/NH/IR/'
+        if not os.path.exists(os.path.dirname(save_dir)):
+            os.makedirs(os.path.dirname(save_dir)) 
+        num_bands, _ = IR.shape
+        np.save(os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_IR_' + str(num_fibers) + 'CFs_' + str(num_bands) + 'bands.npy' )), IR)
+
+        del ng 
+        del IR 
+        del stim
 
 else:
     # use less, will otherwise not work on own pc
