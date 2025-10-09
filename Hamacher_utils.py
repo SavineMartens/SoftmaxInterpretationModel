@@ -4,7 +4,11 @@ from scipy.signal import sosfiltfilt, butter, correlate
 from utilities import *
 from random import gauss
 import matplotlib.pyplot as plt
-from sklearn.metrics import r2_score 
+from sklearn.metrics import r2_score
+import os 
+import yaml
+import glob
+
 
 
 def apply_butter_LP_filter(spike_rate_matrix, binsize, cut_off_freq_Hz = 40, filter_order = 16 ):
@@ -209,6 +213,89 @@ def compute_internal_representation_from_numpy(neurogram,
         plot_single_internal_representation(IR, t_unfiltered, edge_frequency_critical_bands)
 
     return IR
+
+
+def  get_Hamacher_IR_from_numpy(fname,
+                                fiber_IDs,
+                                frequencies,
+                                tau_in = 70e-3, # 70 ms
+                                tau_out = 70e-3, # 70 ms
+                                TP2_cut_off_Hz = 2000,
+                                TP2_filter_order = 1,
+                                band_type = 'critical',
+                                plot_IR=False,
+                                num_critical_bands =42,):
+    spike_times = np.load(fname, allow_pickle=True) 
+    # select partial fibers
+    spike_times = spike_times[fiber_IDs,:]
+    # print(spike_times.shape )
+    [num_fibers, num_trials] = spike_times.shape 
+    fname_clean = os.path.basename(os.path.realpath(fname)).replace('.npy','')
+    output_dir = os.path.dirname(os.path.realpath(fname)) 
+    time_stamp = fname_clean[:fname_clean.find('spike')]
+    f_config = glob.glob(os.path.join(output_dir, time_stamp + "config_output*.yaml"))[0]
+    with open(f_config, "r") as yamlfile:
+        config = yaml.load(yamlfile, Loader=yaml.FullLoader)
+    start_bin = config['binsize']
+    binsize = config['binsize']
+    # spike_matrix = spike_rates*binsize
+    try:
+        PW = config['pulse_width']
+    except:
+        PW = 18e-6
+    try:
+        sound_duration = config['sound_duration']
+    except:
+        latest_list=[]
+        for fiber in np.arange(spike_times.shape[0]):
+            for trial in np.arange(num_trials):
+                latest_list.append(np.max(spike_times[fiber][trial]))
+        sound_duration =  round(np.max(latest_list), 2) #round(np.max(latest_list), int("{:e}".format(new_Fs)[-2:]))
+        # print('Assuming sound duration is 1.0 s')
+    # print(sound_duration)
+    old_Fs = 1/PW
+    new_Fs = 5000
+    new_binsize = 1/new_Fs
+    spike_matrix = calculate_bin_spikes(spike_times, binsize=new_binsize, sound_duration=sound_duration)
+    # if unfiltered_type == 'Hamacher':
+        # sigma_samples = 
+        # spike_matrix = gaussian_filter1d
+    _, _, _, _, _, _, _, _, fiber_frequencies, _ = load_mat_virtual_all_thresholds(config['virtual_thresholds_file'], nerve_model_type=3, state=1, array_type =2)
+
+    for fiber in range(spike_matrix.shape[0]):
+        spike_matrix[fiber,:] = discrete_gaussian_filter(spike_matrix[fiber,:], PW=18e-6)
+
+    SR, _, _, edge_frequency_critical_bands = select_critical_bands(spike_matrix, frequencies, type='entire_band', num_critical_bands=num_critical_bands, number_of_fibers = num_fibers)
+    num_remaining_crit_bands, num_samples = SR.shape
+        
+    t_unfiltered = np.arange(num_samples)*PW
+    T_a = PW # sampling period
+    Z = np.zeros(SR.shape)
+    Y = np.zeros(SR.shape)
+    IR = np.zeros(SR.shape)
+    for n in range(num_remaining_crit_bands):
+        Z_nk = 0
+        for k in range(1,num_samples):
+            SR_nk = SR[n,k]
+            if SR_nk >=  Z_nk:
+                c1 = np.exp(-T_a/tau_in)
+                c2 = 1-c1
+            elif SR_nk < Z_nk:
+                c1 = np.exp(-T_a/tau_out)
+                c2 = 0
+            # Equation 8.6
+            Z_nk = c1*Z_nk + c2*SR_nk 
+            # Equation 8.5
+            Y[n,k] = max(SR_nk, Z_nk)
+            Z[n,k] = Z_nk
+    # TP2
+    IR = apply_butter_LP_filter(Y, T_a, cut_off_freq_Hz=TP2_cut_off_Hz, filter_order=TP2_filter_order)
+    x=3
+    if plot_IR:
+        plot_single_internal_representation(IR, t_unfiltered, edge_frequency_critical_bands)
+        plt.suptitle(config['sound_name'])
+
+    return spike_matrix, IR, config['sound_name'] #, t_unfiltered, edge_frequency_critical_bands
 
 
 def get_Hamacher_NIR(IR, sigma):

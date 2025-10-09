@@ -83,7 +83,7 @@ if platform.system() == 'Linux':
         # creat neurogram
         ng = create_neurogram(stim, plot_neurogram=True, n_trials=1)
         # saving neurogram
-        now = get_time_str(seconds=False)
+        now = get_time_str(seconds=True)
         num_fibers = len(frequencies_EH)
         save_dir = './MP/NH/neurograms/'
         save_path = os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy'))

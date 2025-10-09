@@ -4,6 +4,8 @@ import platform
 import glob
 from utilities import *
 from Hamacher_utils import *
+import platform
+import matplotlib.pyplot as plt
 
 # raw data folder
 if platform.system() == 'Linux':
@@ -11,22 +13,30 @@ if platform.system() == 'Linux':
 else:
     raw_data_folder = './MP/EH/RawData/'
 
-# get fiber id
+# load frequencies and fiber IDs
+frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
+fiber_ids = np.load('./data/fiber_ID_list_FFT.npy')
 # select half of the fibers
+frequencies_EH = frequencies_EH[::2]
+fiber_ids = fiber_ids[::2]
+num_fibers = len(fiber_ids)
 
-for file in sorted(glob.glob(raw_data_folder + '/*trains*.npy')):
-    print(file)
-    spike_trains = np.load(file)
-    # create neurograms
 
-    # saving neurogram
+for f, file in enumerate(sorted(glob.glob(raw_data_folder + '/*trains*.npy'))):
+    print(file, '\n', f+1, 'out of', len(glob.glob(raw_data_folder + '/*trains*.npy')))
+    # get neurogram and IR
+    neurogram, IR, sound_name = get_Hamacher_IR_from_numpy(file, fiber_IDs=fiber_ids, frequencies=frequencies_EH, plot_IR=True, band_type='adapted')
     now = get_time_str(seconds=False)
-    save_dir = './MP/EH/neurograms/'
-    if not os.path.exists(os.path.dirname(save_dir)):
-        os.makedirs(os.path.dirname(save_dir)) 
-    save_path = os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy'))
-    
-    # get internal representations
+    save_dir_neurograms = './MP/EH/neurograms/'
+    save_dir_IR = './MP/EH/IR/'
+    for save_dir in [save_dir_neurograms, save_dir_IR]:
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+    np.save(os.path.join(save_dir_neurograms, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy')), neurogram)
+    np.save(os.path.join(save_dir_IR, now + '_' + sound_name.replace('.wav', '_IR_' + str(num_fibers) + 'CFs_' + str(IR.shape[0]) + 'bands.npy')), IR)  
 
-    # save IR
-    save_dir = './MP/EH/IR/'
+
+
+
+
+plt.show()
