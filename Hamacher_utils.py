@@ -295,7 +295,7 @@ def  get_Hamacher_IR_from_numpy(fname,
         plot_single_internal_representation(IR, t_unfiltered, edge_frequency_critical_bands)
         plt.suptitle(config['sound_name'])
 
-    return spike_matrix, IR, config['sound_name'] #, t_unfiltered, edge_frequency_critical_bands
+    return spike_matrix, IR #, t_unfiltered, edge_frequency_critical_bands
 
 
 def get_Hamacher_NIR(IR, sigma):

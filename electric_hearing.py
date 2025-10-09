@@ -25,16 +25,15 @@ num_fibers = len(fiber_ids)
 for f, file in enumerate(sorted(glob.glob(raw_data_folder + '/*trains*.npy'))):
     print(file, '\n', f+1, 'out of', len(glob.glob(raw_data_folder + '/*trains*.npy')))
     # get neurogram and IR
-    neurogram, IR, sound_name = get_Hamacher_IR_from_numpy(file, fiber_IDs=fiber_ids, frequencies=frequencies_EH, plot_IR=True, band_type='adapted')
-    now = get_time_str(seconds=False)
+    neurogram, IR = get_Hamacher_IR_from_numpy(file, fiber_IDs=fiber_ids, frequencies=frequencies_EH, plot_IR=True, band_type='adapted')
     save_dir_neurograms = './MP/EH/neurograms/'
     save_dir_IR = './MP/EH/IR/'
     for save_dir in [save_dir_neurograms, save_dir_IR]:
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
-    np.save(os.path.join(save_dir_neurograms, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy')), neurogram)
-    np.save(os.path.join(save_dir_IR, now + '_' + sound_name.replace('.wav', '_IR_' + str(num_fibers) + 'CFs_' + str(IR.shape[0]) + 'bands.npy')), IR)  
-
+    np.save(os.path.join(save_dir_neurograms, os.path.basename(file).replace('spike_trains_F120', 'neurogram').replace('.npy', '') + str(num_fibers) + 'CFs.npy'), neurogram)
+    np.save(os.path.join(save_dir_IR, os.path.basename(file).replace('spike_trains_F120', 'neurogram').replace('.npy', '') + str(num_fibers) + 'CFs_' + str(IR.shape[0]) + 'bands.npy'), IR)
+    x=3
 
 
 
