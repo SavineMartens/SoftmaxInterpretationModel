@@ -33,7 +33,7 @@ for f, file in enumerate(sorted(glob.glob(raw_data_folder + '/*trains*.npy'))):
             os.makedirs(save_dir)
     np.save(os.path.join(save_dir_neurograms, os.path.basename(file).replace('spike_trains_F120', 'neurogram').replace('.npy', '') + str(num_fibers) + 'CFs.npy'), neurogram)
     np.save(os.path.join(save_dir_IR, os.path.basename(file).replace('spike_trains_F120', 'neurogram').replace('.npy', '') + str(num_fibers) + 'CFs_' + str(IR.shape[0]) + 'bands.npy'), IR)
-    x=3
+
 
 
 

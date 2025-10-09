@@ -19,8 +19,8 @@ temperature = 20
 dir_to_loop = './MP/EH/IR/'
 
 # get IR
-R_name = glob.glob(os.path.join(dir_to_loop, '*masker_reference1_65_*.npy'))[0]
-RT_max_name = glob.glob(os.path.join(dir_to_loop, '*masker_reference91_65dB_probe_65dB*.npy'))[0]
+R_name = glob.glob(os.path.join(dir_to_loop, '*masker_reference1_rel*.npy'))[0]
+RT_max_name = glob.glob(os.path.join(dir_to_loop, '*masker_reference1_*probe_0*.npy'))[0]
 
 IR_R = np.load(R_name)
 IR_RT_max = np.load(RT_max_name)
@@ -30,12 +30,13 @@ S = IR_RT_max - IR_R
 files = glob.glob(dir_to_loop + '*.npy')
 files.remove(R_name)
 
-scaling_factor_sigma_list = np.arange(0.2, 2.2, 0.2) 
-temperature_list = [0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
+scaling_factor_sigma_list = [0.2, 0.4]#np.arange(0.2, 2.2, 0.2) 
+temperature_list = [0.00002, 0.0002] #[0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
 
-save_dir_figure = './output/MP/NH/figures/'
-save_dir_results = './output/MP/NH/results/'
+save_dir_figure = './output/MP/EH/figures/'
+save_dir_results = './output/MP/EH/results/'
 
+collected = plt.figure()
 
 for folder in [save_dir_figure, save_dir_results]:
     if not os.path.exists(folder):
@@ -53,7 +54,7 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         for f, file in enumerate(files):
             print(file)
             IR_RT = np.load(file)
-            dB = int(file[file.index('probe_') + len('probe_'): file.index('dB_IR')]) - 65
+            dB = int(file[file.index('probe_') + len('probe_'): file.index('dB_rel')]) 
             dB_list.append(dB)
             percentage_correct_memory = iterate_3AFC_memory_softmax_correlation(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False, use_differences = True)           
             percentage_correct_memory_matrix[f] = percentage_correct_memory
@@ -97,12 +98,12 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         dict_pd.columns = dict_pd.iloc[0]
         dict_pd = dict_pd.drop(dict_pd.index[[0]])
 
-        single_run.savefig(save_dir_figure + '/3AFC_memory_soft_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature) + '.png')            
-        np.save(save_dir_results + '/3AFC_memory_soft_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) + '.npy', dict)
+        single_run.savefig(save_dir_figure + '/3AFC_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature) + '.png')            
+        np.save(save_dir_results + '/3AFC_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) + '.npy', dict)
 
         # both in one fig
-        collected = plt.figure()
-        plt.subplot(2,1,1)
+        plt.figure(collected)
+        plt.subplot(1,2,1)
         plt.scatter(x=dB_list, y=y_list_memory, label=f'T: {temperature}, sigma: {scaling_factor_sigma}')
         try:
             plt.plot(sorted_x, y_sig_memory, color='blue')  
@@ -114,8 +115,8 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         plt.ylabel('Percentage correct [%]')
         plt.ylim((30, 100))
         plt.xlim((min(dB_list)-1, max(dB_list)+1))
-        plt.subplot(2,1,2)
-        plt.scatter(x=dB_list, y=y_list_old, label=f'T: {temperature}, sigma: {scaling_factor_sigma}')
+        plt.subplot(1,2,2)
+        plt.scatter(x=dB_list, y=y_list_old, label=f'T: {temperature}, sigma: {scaling_factor_sigma}', color='red')
         try:
             plt.plot(sorted_x, y_sig_old, color='red')
         except:

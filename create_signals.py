@@ -60,6 +60,80 @@ carrier_frequency = 1500 # Hz
 modulation_frequency = 40 # Hz
 modulation_duration = 300e-3
 
+
+def create_AM_tone(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=0, Fs=44100, plot=False):
+    # create unmodulated tone
+    t = np.linspace(0, sound_duration, int(sound_duration*Fs))
+    unmodulated_amplitude = 1
+    unmodulated_stimulus = unmodulated_amplitude * np.sin(2 * np.pi * carrier_frequency * t)
+
+    # create modulated tone
+    modulation_depth = 1* 10**(modulation_dB/20) # m = 10^(dB/20)
+    starting_phase = -np.pi/2 # start at 0 amplitude
+    
+    modulation_stimulus = np.sin(2 * np.pi * modulation_frequency * t + starting_phase)
+    modulated_stimulus = (1 + modulation_depth * modulation_stimulus) * unmodulated_stimulus
+ 
+    # correction factor for loudness
+    amp_modulated_stimulus = 1/np.sqrt(1+ (modulation_depth**2)/2)
+    modulated_stimulus *= amp_modulated_stimulus
+
+    # ramp signal
+    modulated_stimulus = apply_gaussian_ramp(modulated_stimulus, Fs)        
+    unmodulated_stimulus = apply_gaussian_ramp(unmodulated_stimulus, Fs)
+
+    # # get in correct integer range
+    # modulated_stimulus *= np.iinfo(np.int16).max
+    # unmodulated_stimulus *= np.iinfo(np.int16).max
+
+    modulated_segment_fname = './sounds/AM/modulated_reference1_' + str(modulation_dB) + 'dB.wav'
+    unmodulated_segment_fname = './sounds/AM/unmodulated_reference1.wav'
+    # wavfile.write(modulated_segment_fname, Fs, modulated_stimulus.astype(np.int16))
+    # wavfile.write(unmodulated_segment_fname, Fs, unmodulated_stimulus.astype(np.int16))
+    wavfile.write(modulated_segment_fname, Fs, modulated_stimulus)
+    wavfile.write(unmodulated_segment_fname, Fs, unmodulated_stimulus)
+
+    t_full = np.linspace(0, len(modulated_stimulus)/Fs, len(modulated_stimulus))
+
+    # modulated_stimulus = AudioSegment.from_wav(modulated_segment_fname)
+    # unmodulated_stimulus = AudioSegment.from_wav(unmodulated_segment_fname)
+
+    # if len(modulated_stimulus.get_array_of_samples()) != len(unmodulated_stimulus.get_array_of_samples()):
+    #     modulated_stimulus, unmodulated_stimulus = fix_lengths(modulated_stimulus, unmodulated_stimulus)
+    #     print('After fixing lengths:')
+    #     print('length unmodulated', len(unmodulated_stimulus.get_array_of_samples()))
+    #     print('length modulated', len(modulated_stimulus.get_array_of_samples()))
+
+
+
+    # audio_out_file_unmodulated = './sounds/AM/unmodulated_reference1.wav'
+    # audio_out_file_modulated = './sounds/AM/modulated_reference1_' + str(modulation_depth) + 'dB.wav'
+    # unmodulated_stimulus.export(audio_out_file_unmodulated, format="wav")
+    # modulated_stimulus.export(audio_out_file_modulated, format="wav")
+
+    if plot:
+        mod_fig = plt.figure()
+        unmodulated_stimulus = np.array(unmodulated_stimulus.get_array_of_samples())
+        modulated_stimulus = np.array(modulated_stimulus.get_array_of_samples())
+        plt.plot(t_full, unmodulated_stimulus, label='unmodulated', color='blue')
+        plt.plot(t_full, modulated_stimulus, '--', label='modulated with ' + str(modulation_dB) + 'dB depth', color='red')
+        section_length = int(len(modulated_stimulus)/2)
+        rms_unmodulated = np.sqrt(np.mean(unmodulated_stimulus[:section_length]**2))
+        rms_modulated = np.sqrt(np.mean(modulated_stimulus[:section_length]**2))
+        plt.hlines(rms_unmodulated, 0, 0.3, color='blue', label='rms unmodulated')
+        plt.hlines(rms_modulated, 0, 0.3, color='red', linestyle=':', label='rms modulated')
+        # plt.xlim(0.1, 0.15)
+        max_val = 1.1* np.max(modulated_stimulus[:section_length])
+        # plt.ylim((-1*max_val, max_val))
+        plt.legend()
+
+for dB in range(21):
+    modulation_dB = -3*dB
+    print(modulation_dB)
+    create_AM_tone(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=False)
+
+
+
 def create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=0, Fs=44100, plot=False):
     # create reference tone
     reference_dB = 91 # [dB], amplitude of 1 seems to be 
@@ -85,6 +159,10 @@ def create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulatio
     # correction factor for loudness
     amp_modulated_stimulus = 1/np.sqrt(1+ (modulation_depth**2)/2)
     modulated_stimulus *= amp_modulated_stimulus
+
+    # ramp signal
+    modulated_stimulus = apply_gaussian_ramp(modulated_stimulus, Fs)
+    unmodulated_stimulus = apply_gaussian_ramp(unmodulated_stimulus, Fs)
 
     # get in correct integer range
     modulated_stimulus *= np.iinfo(np.int16).max
@@ -119,7 +197,7 @@ def create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulatio
     t_full = np.linspace(0, len(modulated_stimulus.get_array_of_samples())/Fs, len(modulated_stimulus.get_array_of_samples()))
 
     audio_out_file_unmodulated = './sounds/AM/unmodulated_reference91.wav'
-    audio_out_file_modulated = './sounds/AM/modulated_reference91_' + str(modulation_depth) + 'dB.wav'
+    audio_out_file_modulated = './sounds/AM/modulated_reference91_' + str(modulation_dB) + 'dB.wav'
     unmodulated_stimulus.export(audio_out_file_unmodulated, format="wav")
     modulated_stimulus.export(audio_out_file_modulated, format="wav")
 
@@ -134,16 +212,16 @@ def create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulatio
         rms_modulated = np.sqrt(np.mean(modulated_stimulus[:section_length]**2))
         plt.hlines(rms_unmodulated, 0, 0.3, color='blue', label='rms unmodulated')
         plt.hlines(rms_modulated, 0, 0.3, color='red', linestyle=':', label='rms modulated')
-        # plt.xlim(0.1, 0.15)
+        plt.xlim(0.1, 0.15)
         max_val = 1.1* np.max(modulated_stimulus[:section_length])
-        # plt.ylim((-1*max_val, max_val))
+        plt.ylim((-1*max_val, max_val))
         plt.legend()
   
 
-for dB in range(21):
-    modulation_dB = -3*dB
-    print(modulation_dB)
-    create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=True)
+# for dB in range(21):
+#     modulation_dB = -3*dB
+#     print(modulation_dB)
+#     create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=True)
 
 
 
