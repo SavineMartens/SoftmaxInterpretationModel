@@ -15,8 +15,9 @@ from Hamacher_utils import *
 
 
 frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
+frequencies_EH = frequencies_EH[::2]
 Fs = 1e4
-
+test = 'AM'
 
 
 def get_stimulus_wo_reference(data_dir, sound_name, timing_wo_reference=0.3):
@@ -74,24 +75,25 @@ if platform.system() == 'Linux':
     # frequencies_EH = frequencies_EH[::2]
     import sys
     # file = sys.argv[1]
+
     
-    for file in sorted(glob.glob('./sounds/MP/*.wav')):
+    for file in sorted(glob.glob('./sounds/' + test + '/*.wav')):
         sound_name = os.path.basename(file)
         print(f'Processing {sound_name}...')
         # get stimulus at correct dB
-        stim = get_stimulus_wo_reference('./sounds/MP', sound_name, timing_wo_reference=0.25)
+        stim = get_stimulus_wo_reference('./sounds/' + test, sound_name, timing_wo_reference=0.25)
         # creat neurogram
         ng = create_neurogram(stim, plot_neurogram=True, n_trials=1)
         # saving neurogram
         now = get_time_str(seconds=True)
         num_fibers = len(frequencies_EH)
-        save_dir = './MP/NH/neurograms/'
+        save_dir = './' + test + '/NH/neurograms/'
         save_path = os.path.join(save_dir, now + '_' + sound_name.replace('.wav', '_neurogram_' + str(num_fibers) + 'CFs.npy'))
         save_neurogram(ng, save_path)
         # get internal representations
         IR = compute_internal_representation_from_object(ng, frequencies_EH)
         # save IR
-        save_dir = './MP/NH/IR/'
+        save_dir = './' + test + '/NH/IR/'
         if not os.path.exists(os.path.dirname(save_dir)):
             os.makedirs(os.path.dirname(save_dir)) 
         num_bands, _ = IR.shape
@@ -103,7 +105,7 @@ if platform.system() == 'Linux':
 
 else:
     # use less, will otherwise not work on own pc
-    frequencies_EH = frequencies_EH[::2]
+
     ng_file = './MP/NH/neurograms/2025-10-08_10h26_masker_reference91_65_neurogram_952CFs.npy'
     ng = np.load(ng_file, allow_pickle=True)
 
