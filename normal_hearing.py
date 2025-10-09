@@ -77,7 +77,7 @@ if platform.system() == 'Linux':
     # file = sys.argv[1]
 
     
-    for file in sorted(glob.glob('./sounds/' + test + '/*.wav')):
+    for file in sorted(glob.glob('./sounds/' + test + '/*reference91*.wav')):
         sound_name = os.path.basename(file)
         print(f'Processing {sound_name}...')
         # get stimulus at correct dB
