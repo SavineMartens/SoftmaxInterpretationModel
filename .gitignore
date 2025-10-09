@@ -5,6 +5,7 @@ softmax_venv/
 neurograms/
 MP/NH/neurograms/
 output/
+MP/EH/RawData/
 
 *out
 *slurm

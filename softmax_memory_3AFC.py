@@ -9,6 +9,8 @@ from utilities import *
 # To do
 # [ ] check if RT max in memory causes not to reach 100% accuracy
 # [ ] plot IR!!!
+# [ ] create EH files
+# [ ] run softmax with EH
 
 # parms
 scaling_factor_sigma = 0.2
@@ -28,8 +30,16 @@ S = IR_RT_max - IR_R
 files = glob.glob(dir_to_loop + '*.npy')
 files.remove(R_name)
 
-scaling_factor_sigma_list = [0.1, 0.2, 0.3, 0.4, 0.5]
-temperature_list = [0.002, 0.02, 0.2, 2, 20, 200]
+scaling_factor_sigma_list = np.arange(0.2, 2.2, 0.2) 
+temperature_list = [0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
+
+save_dir_figure = './output/MP/NH/figures/'
+save_dir_results = './output/MP/NH/results/'
+
+
+for folder in [save_dir_figure, save_dir_results]:
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 for scaling_factor_sigma in scaling_factor_sigma_list:
     for temperature in temperature_list:
@@ -54,7 +64,7 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         y_list_memory = percentage_correct_memory_matrix*100
         y_list_old = percentage_correct_old_matrix*100
         # plot psychometric curve
-        plt.figure(figsize=(8, 8))
+        single_run = plt.figure(figsize=(8, 8))
         plt.scatter(x=dB_list, y=y_list_memory, label='memory S', color='blue')
         plt.scatter(x=dB_list, y=y_list_old, label='old S', color='red')
         plt.ylim((0, 100))
@@ -62,6 +72,7 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         plt.xlabel('dB', fontsize=20)
         plt.ylabel('Percentage correct [%]', fontsize=20)
         plt.title('3AFC memory softmax, sigma_SF: ' + str(scaling_factor_sigma) + ', temp: ' + str(temperature), fontsize=20)
+        plt.legend()
 
         # fit sigmoid
         sorted_x = np.sort(dB_list)
@@ -86,21 +97,32 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         dict_pd.columns = dict_pd.iloc[0]
         dict_pd = dict_pd.drop(dict_pd.index[[0]])
 
-        save_dir_figure_memory = './output/MP/NH/figures/softmax_memory'
-        save_dir_results_memory = './output/MP/NH/results/softmax_memory'
-        save_dir_figure_old = './output/MP/NH/figures/softmax/'
-        save_dir_results_old = './output/MP/NH/results/softmax/'
+        single_run.savefig(save_dir_figure + '/3AFC_memory_soft_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature) + '.png')            
+        np.save(save_dir_results + '/3AFC_memory_soft_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) + '.npy', dict)
+
+        # both in one fig
+        collected = plt.figure()
+        plt.subplot(2,1,1)
+        plt.scatter(x=dB_list, y=y_list_memory, label=f'T: {temperature}, sigma: {scaling_factor_sigma}')
+        try:
+            plt.plot(sorted_x, y_sig_memory, color='blue')  
+        except:
+            print('No fit')
+        plt.title('Memory softmax')
+        plt.legend()
+        plt.xlabel('dB re Masker')
+        plt.ylabel('Percentage correct [%]')
+        plt.subplot(2,1,2)
+        plt.scatter(x=dB_list, y=y_list_old, label=f'T: {temperature}, sigma: {scaling_factor_sigma}')
+        try:
+            plt.plot(sorted_x, y_sig_old, color='red')
+        except:
+            print('No fit')
+        plt.legend()
+        plt.title('Old softmax')
+        plt.xlabel('dB re Masker')
+        plt.ylabel('Percentage correct [%]')
 
 
-        for folder in [save_dir_figure_memory, save_dir_results_memory, save_dir_figure_old, save_dir_results_old]:
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-
-        plt.savefig(save_dir_figure_memory + '/3AFC_memory_soft_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature) + '.png')            
-        np.save(save_dir_results_memory + '/3AFC_memory_soft_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) + '.npy', dict)
-
-        plt.savefig(save_dir_figure_old + '/3AFC_softmax_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature) + '.png')            
-        np.save(save_dir_results_old + '/3AFC_softmax_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) + '.npy', dict)
-
-
+collected.savefig(save_dir_figure + '/3AFC_collected_sigmaSF_' + str(scaling_factor_sigma_list)+ '_temp_' + str(temperature_list) + '.png')            
 plt.show()
