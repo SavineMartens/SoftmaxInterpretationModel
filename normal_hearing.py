@@ -71,7 +71,7 @@ if platform.system() == 'Linux':
     import matplotlib
     matplotlib.use('Agg') 
     # use less
-    frequencies_EH = frequencies_EH[::2]
+    # frequencies_EH = frequencies_EH[::2]
     import sys
     file = sys.argv[1]
     
