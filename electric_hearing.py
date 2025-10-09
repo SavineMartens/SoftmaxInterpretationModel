@@ -7,11 +7,13 @@ from Hamacher_utils import *
 import platform
 import matplotlib.pyplot as plt
 
+test = 'AM'
+
 # raw data folder
 if platform.system() == 'Linux':
     raw_data_folder = '/exports/kno-shark/users/Savine/python/temporal-phast-plus/output/'
 else:
-    raw_data_folder = './MP/EH/RawData/'
+    raw_data_folder = './'+ test +'/EH/RawData/'
 
 # load frequencies and fiber IDs
 frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
@@ -26,8 +28,8 @@ for f, file in enumerate(sorted(glob.glob(raw_data_folder + '/*trains*.npy'))):
     print(file, '\n', f+1, 'out of', len(glob.glob(raw_data_folder + '/*trains*.npy')))
     # get neurogram and IR
     neurogram, IR = get_Hamacher_IR_from_numpy(file, fiber_IDs=fiber_ids, frequencies=frequencies_EH, plot_IR=True, band_type='adapted')
-    save_dir_neurograms = './MP/EH/neurograms/'
-    save_dir_IR = './MP/EH/IR/'
+    save_dir_neurograms = './'+ test +'/EH/neurograms/'
+    save_dir_IR = './'+ test +'/EH/IR/'
     for save_dir in [save_dir_neurograms, save_dir_IR]:
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)

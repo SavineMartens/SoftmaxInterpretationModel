@@ -9,13 +9,10 @@ from utilities import *
 # To do
 # [ ] check if RT max in memory causes not to reach 100% accuracy
 # [ ] plot IR!!!
-# [ ] create EH files
+# [X] create EH files
 # [ ] run softmax with EH
 
 # parms
-scaling_factor_sigma = 0.2
-temperature = 20
-
 dir_to_loop = './MP/EH/IR/'
 
 # get IR
@@ -30,8 +27,12 @@ S = IR_RT_max - IR_R
 files = glob.glob(dir_to_loop + '*.npy')
 files.remove(R_name)
 
-scaling_factor_sigma_list = [0.2, 0.4]#np.arange(0.2, 2.2, 0.2) 
-temperature_list = [0.00002, 0.0002] #[0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
+scaling_factor_sigma_list = np.arange(0.2, 2.2, 0.2) 
+temperature_list = [0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
+
+import matplotlib as mpl
+color_map = plt.get_cmap('viridis', len(temperature_list))
+custom_palette = [mpl.colors.rgb2hex(color_map(i)) for i in range(color_map.N)]
 
 save_dir_figure = './output/MP/EH/figures/'
 save_dir_results = './output/MP/EH/results/'
@@ -104,9 +105,9 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         # both in one fig
         plt.figure(collected)
         plt.subplot(1,2,1)
-        plt.scatter(x=dB_list, y=y_list_memory, label=f'T: {temperature}, sigma: {scaling_factor_sigma}')
+        plt.scatter(x=dB_list, y=y_list_memory, label=f'T: {temperature}, sigma: {scaling_factor_sigma}', color=custom_palette[temperature_list.index(temperature)])
         try:
-            plt.plot(sorted_x, y_sig_memory, color='blue')  
+            plt.plot(sorted_x, y_sig_memory, color=custom_palette[temperature_list.index(temperature)])  
         except:
             print('No fit')
         plt.title('Memory softmax')
@@ -116,9 +117,9 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         plt.ylim((30, 100))
         plt.xlim((min(dB_list)-1, max(dB_list)+1))
         plt.subplot(1,2,2)
-        plt.scatter(x=dB_list, y=y_list_old, label=f'T: {temperature}, sigma: {scaling_factor_sigma}', color='red')
+        plt.scatter(x=dB_list, y=y_list_old, label=f'T: {temperature}, sigma: {scaling_factor_sigma}', color=custom_palette[temperature_list.index(temperature)])
         try:
-            plt.plot(sorted_x, y_sig_old, color='red')
+            plt.plot(sorted_x, y_sig_old, color=custom_palette[temperature_list.index(temperature)])
         except:
             print('No fit')
         plt.legend()
