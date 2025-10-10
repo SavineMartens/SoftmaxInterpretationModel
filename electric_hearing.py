@@ -23,9 +23,13 @@ frequencies_EH = frequencies_EH[::2]
 fiber_ids = fiber_ids[::2]
 num_fibers = len(fiber_ids)
 
+if test == 'AM':
+    string_to_find = '*dulated*reference1*trains*.npy'
+if test == 'MP':
+    string_to_find = '*masker*reference1*trains*.npy'
 
-for f, file in enumerate(sorted(glob.glob(raw_data_folder + '/*reference1*trains*.npy'))):
-    print(file, '\n', f+1, 'out of', len(glob.glob(raw_data_folder + '/*reference1*trains*.npy')))
+for f, file in enumerate(sorted(glob.glob(raw_data_folder + string_to_find))):
+    print(file, '\n', f+1, 'out of', len(glob.glob(raw_data_folder + string_to_find)))
     # get neurogram and IR
     neurogram, IR = get_Hamacher_IR_from_numpy(file, fiber_IDs=fiber_ids, frequencies=frequencies_EH, plot_IR=True, band_type='adapted')
     save_dir_neurograms = './'+ test +'/EH/neurograms/'
