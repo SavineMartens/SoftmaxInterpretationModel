@@ -73,7 +73,7 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         plt.xlim((min(dB_list)-1, max(dB_list)+1))
         plt.xlabel('dB', fontsize=20)
         plt.ylabel('Percentage correct [%]', fontsize=20)
-        plt.title('3AFC - masker probe, sigma_SF: ' + str(scaling_factor_sigma) + ', temp: ' + str(temperature), fontsize=20)
+        plt.title('3AFC EH - MP, sigma_SF: ' + str(scaling_factor_sigma) + ', temp: ' + str(temperature), fontsize=20)
         plt.legend()
 
         # fit sigmoid

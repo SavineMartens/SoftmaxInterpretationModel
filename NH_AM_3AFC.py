@@ -19,22 +19,22 @@ temperature = 20
 dir_to_loop = './AM/NH/IR/'
 
 # get IR
-R_name = glob.glob(os.path.join(dir_to_loop, '*masker_reference91_65_*.npy'))[0]
-RT_max_name = glob.glob(os.path.join(dir_to_loop, '*masker_reference91_65dB_probe_65dB*.npy'))[0]
+R_name = glob.glob(os.path.join(dir_to_loop, 'unmodulated*reference91*.npy'))[0]
+RT_max_name = glob.glob(os.path.join(dir_to_loop, '*modulated*reference91*_0dB.npy'))[0]
 
 IR_R = np.load(R_name)
 IR_RT_max = np.load(RT_max_name)
 # S memory
 S = IR_RT_max - IR_R
 
-files = glob.glob(dir_to_loop + '*.npy')
+files = glob.glob(dir_to_loop + '*reference91*.npy')
 files.remove(R_name)
 
 scaling_factor_sigma_list = np.arange(0.2, 2.2, 0.2) 
 temperature_list = [0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
 
-save_dir_figure = './output/MP/NH/figures/'
-save_dir_results = './output/MP/NH/results/'
+save_dir_figure = './output/AM/NH/figures/'
+save_dir_results = './output/AM/NH/results/'
 
 
 for folder in [save_dir_figure, save_dir_results]:
@@ -53,7 +53,7 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         for f, file in enumerate(files):
             print(file)
             IR_RT = np.load(file)
-            dB = int(file[file.index('probe_') + len('probe_'): file.index('dB_IR')]) - 65
+            dB = int(file[file.index('91_') + len('91_'): file.index('dB.wav')]) 
             dB_list.append(dB)
             percentage_correct_memory = iterate_3AFC_memory_softmax_correlation(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False, use_differences = True)           
             percentage_correct_memory_matrix[f] = percentage_correct_memory
