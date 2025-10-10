@@ -71,8 +71,8 @@ if __name__ == "__main__":
     S = IR_RT_max - IR_R
     files = glob.glob(dir_to_loop + '*.npy')
     files.remove(R_name)    
-    scaling_factor_sigma_list = [0.2, 2.2]#np.arange(0.2, 2.2, 0.2)
-    temperature_list = [0.00002, 0.0002] #[0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
+    scaling_factor_sigma_list = np.arange(0.2, 2.2, 0.2)
+    temperature_list = [0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
 
     # create color map
     color_map = plt.get_cmap('viridis', len(temperature_list))
