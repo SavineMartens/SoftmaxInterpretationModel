@@ -7,11 +7,11 @@ cat << EOF > /exports/kno-shark/users/Savine/python/temporal/tmp_sbatch.sh
 #SBATCH --output=%x_%j.out 
 #SBATCH --mail-user="s.s.m.martens@lumc.nl" 
 #SBATCH --mail-type="ALL" 
-#SBATCH --mem=10G 
+#SBATCH --mem=20G 
 #SBATCH --time=168:00:00 
 #SBATCH --partition=all 
 #SBATCH --ntasks=1 
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=1
 
 # load modules
 module purge 
@@ -35,7 +35,7 @@ sbatch /exports/kno-shark/users/Savine/python/temporal/tmp_sbatch.sh
 rm /exports/kno-shark/users/Savine/python/temporal/tmp_sbatch.sh
 }
 
-for f in  /exports/kno-shark/users/Savine/python/SoftmaxInterpretationModel/sounds/MP/*wav
+for f in  /exports/kno-shark/users/Savine/python/SoftmaxInterpretationModel/sounds/MP/*91*wav
     do 
 	echo $f 
 	submit_sbatch $f 
