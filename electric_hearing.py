@@ -24,8 +24,8 @@ fiber_ids = fiber_ids[::2]
 num_fibers = len(fiber_ids)
 
 
-for f, file in enumerate(sorted(glob.glob(raw_data_folder + '/*trains*.npy'))):
-    print(file, '\n', f+1, 'out of', len(glob.glob(raw_data_folder + '/*trains*.npy')))
+for f, file in enumerate(sorted(glob.glob(raw_data_folder + '/*reference1*trains*.npy'))):
+    print(file, '\n', f+1, 'out of', len(glob.glob(raw_data_folder + '/*reference1*trains*.npy')))
     # get neurogram and IR
     neurogram, IR = get_Hamacher_IR_from_numpy(file, fiber_IDs=fiber_ids, frequencies=frequencies_EH, plot_IR=True, band_type='adapted')
     save_dir_neurograms = './'+ test +'/EH/neurograms/'
