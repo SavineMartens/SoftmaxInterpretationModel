@@ -21,7 +21,7 @@ if platform.system() == 'Linux':
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-test', type=str, default='MP', help='AM or MP')
+    parser.add_argument('-test', type=str, default='AM', help='AM or MP')
     parser.add_argument('-hearing', type=str, default='NH', help='NH or EH')
     args = parser.parse_args()
     test = args.test
@@ -33,12 +33,12 @@ if __name__ == "__main__":
         save_dir_results = './output/AM/' + hearing + '/results/'
         if hearing == 'NH':
             wildcard_R = '*unmodulated*reference91*.npy'
-            wildcard_RT_max = '*modulated*reference91*_0dB.npy'
+            wildcard_RT_max = '*modulated*reference91*_0dB*.npy'
             wildcard_dB_start = '91_'
             wildcard_dB_end = 'dB_IR'
         if hearing == 'EH':
             wildcard_R = '*unmodulated*reference1*.npy'
-            wildcard_RT_max = '*modulated*reference1*_0dB.npy'
+            wildcard_RT_max = '*modulated*reference1*_0dB*.npy'
             wildcard_dB_start = 'reference1_'
             wildcard_dB_end = 'dB_relscale'
     if test == 'MP':
