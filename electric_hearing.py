@@ -13,7 +13,7 @@ test = 'AM'
 if platform.system() == 'Linux':
     raw_data_folder = '/exports/kno-shark/users/Savine/python/temporal-phast-plus/output/'
 else:
-    raw_data_folder = 'S:/python/temporal-phast-plus/output/'  #'./'+ test +'/EH/RawData/'
+    raw_data_folder = f'./{test}/EH/RawData/'
 
 # load frequencies and fiber IDs
 frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')
@@ -24,9 +24,12 @@ fiber_ids = fiber_ids[::2]
 num_fibers = len(fiber_ids)
 
 if test == 'AM':
-    string_to_find = '*dulated*reference1*trains*.npy'
+    string_to_find = '*trains*dulated*reference1*.npy'
 if test == 'MP':
-    string_to_find = '*masker*reference1*trains*.npy'
+    string_to_find = '*trains*masker*reference1*.npy'
+
+files = sorted(glob.glob(raw_data_folder + string_to_find))
+print(f'Found {len(files)} files')
 
 for f, file in enumerate(sorted(glob.glob(raw_data_folder + string_to_find))):
     print(file, '\n', f+1, 'out of', len(glob.glob(raw_data_folder + string_to_find)))

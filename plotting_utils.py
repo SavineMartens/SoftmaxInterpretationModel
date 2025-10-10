@@ -11,7 +11,7 @@ def plot_single_internal_representation(IR, t_filtered_resampled, frequency_band
         number_bands_prime += 1
         if not is_prime(number_bands_prime):
             row_plot, column_plot = closestDivisors(number_bands_prime)
-            print(row_plot, column_plot)
+            # print(row_plot, column_plot)
     fig, ax = plt.subplots(row_plot, column_plot, sharey=True, sharex=True)
     axes = ax.flatten()
     for n in range(num_remaining_crit_bands):
