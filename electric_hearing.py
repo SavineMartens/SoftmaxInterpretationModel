@@ -13,7 +13,7 @@ test = 'AM'
 if platform.system() == 'Linux':
     raw_data_folder = '/exports/kno-shark/users/Savine/python/temporal-phast-plus/output/'
 else:
-    raw_data_folder = './'+ test +'/EH/RawData/'
+    raw_data_folder = 'S:/python/temporal-phast-plus/output/'  #'./'+ test +'/EH/RawData/'
 
 # load frequencies and fiber IDs
 frequencies_EH = np.load('./data/EH_freq_vector_electrode_allocation_logspaced.npy')

@@ -30,8 +30,8 @@ S = IR_RT_max - IR_R
 files = glob.glob(dir_to_loop + '*.npy')
 files.remove(R_name)
 
-scaling_factor_sigma_list = np.arange(0.2, 2.2, 0.2) 
-temperature_list = [0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
+scaling_factor_sigma_list = [0.2, 2.2]#np.arange(0.2, 2.2, 0.2) 
+temperature_list = [0.00002, 0.0002]#[0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
 
 save_dir_figure = './output/MP/NH/figures/'
 save_dir_results = './output/MP/NH/results/'
@@ -42,6 +42,8 @@ for folder in [save_dir_figure, save_dir_results]:
         os.makedirs(folder)
 
 for scaling_factor_sigma in scaling_factor_sigma_list:
+    # both in one fig
+    collected = plt.figure(f'Collected with {scaling_factor_sigma}', figsize=(16, 8))
     for temperature in temperature_list:
         print(f'scaling factor sigma: {scaling_factor_sigma}, temperature: {temperature}')
         sigma_w =  np.std(IR_R)*scaling_factor_sigma
@@ -100,33 +102,35 @@ for scaling_factor_sigma in scaling_factor_sigma_list:
         single_run.savefig(save_dir_figure + '/3AFC_memory_soft_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature) + '.png')            
         np.save(save_dir_results + '/3AFC_memory_soft_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) + '.npy', dict)
 
-        # both in one fig
-        collected = plt.figure()
+        plt.figure(f'Collected with {scaling_factor_sigma}')
         plt.subplot(2,1,1)
         plt.scatter(x=dB_list, y=y_list_memory, label=f'T: {temperature}, sigma: {scaling_factor_sigma}')
         try:
             plt.plot(sorted_x, y_sig_memory, color='blue')  
         except:
             print('No fit')
-        plt.title('Memory softmax')
-        plt.legend()
-        plt.xlabel('dB re Masker')
-        plt.ylabel('Percentage correct [%]')
-        plt.ylim((30, 100))
-        plt.xlim((min(dB_list)-1, max(dB_list)+1))
         plt.subplot(2,1,2)
         plt.scatter(x=dB_list, y=y_list_old, label=f'T: {temperature}, sigma: {scaling_factor_sigma}')
         try:
             plt.plot(sorted_x, y_sig_old, color='red')
         except:
             print('No fit')
-        plt.legend()
-        plt.title('Old softmax')
-        plt.xlabel('dB re Masker')
-        plt.ylabel('Percentage correct [%]')
-        plt.ylim((30, 100))
-        plt.xlim((min(dB_list)-1, max(dB_list)+1))
 
-
-collected.savefig(save_dir_figure + '/3AFC_collected_sigmaSF_' + str(scaling_factor_sigma_list)+ '_temp_' + str(temperature_list) + '.png')            
+    plt.figure(f'Collected with {scaling_factor_sigma}')
+    plt.figure(collected)
+    plt.subplot(2,1,1)
+    plt.title('Memory softmax')
+    plt.legend(ncol=2)
+    plt.xlabel('dB re Masker')
+    plt.ylabel('Percentage correct [%]')
+    plt.ylim((30, 100))
+    plt.xlim((min(dB_list)-1, max(dB_list)+1))
+    plt.subplot(2,1,2)
+    plt.legend(ncol=2)
+    plt.title('Old softmax')
+    plt.xlabel('dB re Masker')
+    plt.ylabel('Percentage correct [%]')
+    plt.ylim((30, 100))
+    plt.xlim((min(dB_list)-1, max(dB_list)+1))
+    collected.savefig(save_dir_figure + '/3AFC_collected_sigmaSF_' + str(scaling_factor_sigma_list)+ '_temp_' + str(temperature_list) + '.png')            
 plt.show()
