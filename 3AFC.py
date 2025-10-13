@@ -94,7 +94,7 @@ if __name__ == "__main__":
     for scaling_factor_sigma in scaling_factor_sigma_list:
         sigma_w =  np.std(IR_R)*scaling_factor_sigma
         # both in one fig
-        collected = plt.figure(f'Collected with {scaling_factor_sigma}', figsize=(16, 8))
+        collected = plt.figure(f'{hearing}: Collected with {scaling_factor_sigma}', figsize=(16, 8))
 
         dB_list = []
         percentage_correct_memory_matrix = np.zeros((len(files), len(temperature_list)))
