@@ -1,6 +1,7 @@
 # environment
 softmax_venv/
 paper/
+logs/
 
 # large folders
 neurograms/
@@ -14,3 +15,4 @@ AM/EH/RawData/
 *slurm
 run_NH_MP
 run*
+*.png

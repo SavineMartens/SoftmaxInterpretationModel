@@ -13,7 +13,8 @@ import platform
 # [ ] check if RT max in memory causes not to reach 100% accuracy
 # [ ] plot IR!!!
 # [ ] also create OG Hamacher
-
+# [ ] implement Gumbel distributed noise 
+# [ ] check if this is similar to e-softmax in this paper: https://pmc.ncbi.nlm.nih.gov/articles/PMC5001502/pdf/nihms780191.pdf
 
 if platform.system() == 'Linux':
     plt.switch_backend('agg')
@@ -56,6 +57,8 @@ if __name__ == "__main__":
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_relscale'
     
+    print(f'Running {test} for {hearing}')
+
     if hearing == 'NH' and test == 'MP':
         dB_correction = -65
     else:
@@ -66,13 +69,17 @@ if __name__ == "__main__":
     RT_max_name = glob.glob(os.path.join(dir_to_loop, wildcard_RT_max))[0]
     IR_R = np.load(R_name)
     IR_RT_max = np.load(RT_max_name)
-    # S memory
-    # S = IR_RT_max - IR_R                                                                    
+    
+    # S memory in softmax
     S = IR_RT_max - IR_R
     files = glob.glob(dir_to_loop + '*.npy')
     files.remove(R_name)    
-    scaling_factor_sigma_list = np.arange(0.2, 2.2, 0.2)
-    temperature_list = [0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
+    if platform.system() == 'Windows':
+        scaling_factor_sigma_list = [0.2, 2.2]
+        temperature_list = [0.00002, 0.0002]
+    else:
+        scaling_factor_sigma_list = [0.0001, 0.0010, 0.0030, 0.0090, 0.0270, 0.0810, 0.2430, 0.7290, 2.1870, 6.5610, 19.6830]#np.arange(0.2, 2.2, 0.2)
+        temperature_list =  [0.0001, 0.0010, 0.0030, 0.0090, 0.0270, 0.0810, 0.2430, 0.7290, 2.1870, 6.5610, 19.6830] #[0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
 
     # create color map
     color_map = plt.get_cmap('viridis', len(temperature_list))
@@ -89,55 +96,70 @@ if __name__ == "__main__":
         # both in one fig
         collected = plt.figure(f'Collected with {scaling_factor_sigma}', figsize=(16, 8))
 
-        for temperature in temperature_list:
-            print(f'scaling factor sigma: {scaling_factor_sigma}, temperature: {temperature}')
-            
-            dB_list = []
-            percentage_correct_memory_matrix = np.zeros(len(files))
-            percentage_correct_old_matrix = np.zeros(len(files))
+        dB_list = []
+        percentage_correct_memory_matrix = np.zeros((len(files), len(temperature_list)))
+        percentage_correct_old_softmax_matrix = np.zeros((len(files), len(temperature_list)))
+        percentage_correct_Hamacher_matrix = np.zeros(len(files))
 
-            # loop RT
-            for f, file in enumerate(files):
-                print(file)
-                IR_RT = np.load(file)
-                dB = int(file[file.index(wildcard_dB_start) + len(wildcard_dB_start): file.index(wildcard_dB_end)]) + dB_correction
-                dB_list.append(dB)
-                percentage_correct_memory = iterate_3AFC_memory_softmax_correlation(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False, use_differences = True)           
-                percentage_correct_memory_matrix[f] = percentage_correct_memory
-                percentage_correct_old = iterate_3AFC_memory_softmax_correlation(IR_RT, IR_R, IR_RT - IR_R, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False, use_differences = True)           
-                percentage_correct_old_matrix[f] = percentage_correct_old
 
-            y_list_memory = percentage_correct_memory_matrix*100
-            y_list_old = percentage_correct_old_matrix*100
+        # loop RT
+        for f, file in enumerate(files):
+            print(f'Processing file {f+1}/{len(files)}: {file}')
+            IR_RT = np.load(file)
+            dB = int(file[file.index(wildcard_dB_start) + len(wildcard_dB_start): file.index(wildcard_dB_end)]) + dB_correction
+            dB_list.append(dB)
 
+            # Hamacher
+            percentage_correct_Hamacher = Hamacher_3AFC(IR_RT, IR_R, sigma_w, measure='pearson', n_iter=100, use_De=False)
+            percentage_correct_Hamacher_matrix[f] = percentage_correct_Hamacher
+
+            for t, temperature in enumerate(temperature_list):
+                print(f'scaling factor sigma: {scaling_factor_sigma}, temperature: {temperature}')    
+                # new version: sofmax with memory RT_max
+                percentage_correct_memory = Softmax_memory_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False)          
+                percentage_correct_memory_matrix[f, t] = percentage_correct_memory
+                # new version: softmax with old RT
+                percentage_correct_old_softmax = Softmax_memory_3AFC(IR_RT, IR_R, IR_RT - IR_R, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False)           
+                percentage_correct_old_softmax_matrix[f, t] = percentage_correct_old_softmax
+                
+        y_list_memory = percentage_correct_memory_matrix*100
+        y_list_old_softmax = percentage_correct_old_softmax_matrix*100
+
+        for t, temperature in enumerate(temperature_list):
             # plot psychometric curve
             single_run = plt.figure(figsize=(8, 8))
-            plt.scatter(dB_list, y_list_memory, label='Memory', color='blue')
-            plt.scatter(dB_list, y_list_old, label='Old', color='red')
-            plt.ylim((30, 100))
+            plt.scatter(dB_list, y_list_memory[:,t], label='softmax RT_max', color='blue')
+            plt.scatter(dB_list, y_list_old_softmax[:,t], label='softmax RT', color='red')
+            plt.scatter(dB_list, percentage_correct_Hamacher_matrix*100, label='Hamacher', color='green')
+            plt.ylim((30, 101))
             plt.xlim((min(dB_list)-1, max(dB_list)+1))
             plt.legend()
-            plt.title(f'Scaling factor sigma: {scaling_factor_sigma}, temperature: {temperature}')
+            plt.title(f'{hearing}: Scaling factor sigma: {scaling_factor_sigma}, temperature: {temperature}')
             plt.xlabel('dB re Masker')  
             plt.ylabel('Percentage correct [%]')
 
             # get fitted curve
             sorted_x = np.sort(dB_list)
-            sorted_y_memory = y_list_memory[np.array(dB_list).argsort()]
-            sorted_y_old = y_list_old[np.array(dB_list).argsort()]
+            sorted_y_memory = y_list_memory[np.array(dB_list).argsort(),t]
+            sorted_y_old_softmax = y_list_old_softmax[np.array(dB_list).argsort(),t]
+            sorted_y_Hamacher = percentage_correct_Hamacher_matrix[np.array(dB_list).argsort()]*100
             try:
                 y_sig_memory = fit_sigmoid(sorted_x, sorted_y_memory)
                 plt.plot(sorted_x, y_sig_memory, color='blue')
-                y_sig_old = fit_sigmoid(sorted_x, sorted_y_old)
-                plt.plot(sorted_x, y_sig_old, color='red')
+                y_sig_old_softmax = fit_sigmoid(sorted_x, sorted_y_old_softmax)
+                plt.plot(sorted_x, y_sig_old_softmax, color='red')
+                y_sig_Hamacher = fit_sigmoid(sorted_x, sorted_y_Hamacher)
+                plt.plot(sorted_x, y_sig_Hamacher, color='green')
             except:
                 print('Could not find psychometric fit')
 
             # saving data to pandas
             dict_pd = dict(zip(sorted_x, sorted_y_memory))
-            dict_pd.update({"sorted_old": sorted_y_old,
+            dict_pd.update({"sorted_old_softmax": sorted_y_old_softmax,
+                            "sorted_Hamacher": sorted_y_Hamacher,
                             "fit_memory" : y_sig_memory if 'y_sig' in locals() else 'no_fit',
-                            "fit_old" : y_sig_old if 'y_sig' in locals() else 'no_fit',
+                            "fit_old_softmax" : y_sig_old_softmax if 'y_sig' in locals() else 'no_fit',
+                            "fit_Hamacher" : y_sig_Hamacher if 'y_sig' in locals() else 'no_fit',
                             "temperature": temperature,
                             "sigma_SF": scaling_factor_sigma})
             dict_pd = pd.DataFrame(dict_pd.items())
@@ -147,36 +169,39 @@ if __name__ == "__main__":
             single_run.savefig(save_dir_figure + '/3AFC_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature) + '.png')            
             np.save(save_dir_results + '/3AFC_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) + '.npy', dict_pd)
 
-            plt.figure(f'Collected with {scaling_factor_sigma}')
-            plt.subplot(1,2,1)
-            plt.scatter(x=dB_list, y=y_list_memory, label=f'T: {temperature}', color=custom_palette[temperature_list.index(temperature)])
+            plt.figure(f'{hearing}: Collected with {scaling_factor_sigma}')
+            plt.subplot(1,3,1)
+            plt.title('Memory softmax with RT_max')
+            plt.scatter(x=dB_list, y=y_list_memory[:,t], label=f'T: {temperature}', color=custom_palette[temperature_list.index(temperature)])
             try:
                 plt.plot(sorted_x, y_sig_memory, color=custom_palette[temperature_list.index(temperature)])  
             except:
                 print('No fit')
-            plt.subplot(1,2,2)
-            plt.scatter(x=dB_list, y=y_list_old, label=f'T: {temperature}', color=custom_palette[temperature_list.index(temperature)])
+            plt.subplot(1,3,2)
+            plt.title('Softmax with old RT')
+            plt.scatter(x=dB_list, y=y_list_old_softmax[:,t], label=f'T: {temperature}', color=custom_palette[temperature_list.index(temperature)])
             try:
-                plt.plot(sorted_x, y_sig_old, color=custom_palette[temperature_list.index(temperature)])
+                plt.plot(sorted_x, y_sig_old_softmax, color=custom_palette[temperature_list.index(temperature)])
             except:
                 print('No fit')
-        plt.figure(f'Collected with {scaling_factor_sigma}')
-        plt.subplot(1,2,1)
-        plt.title('Memory softmax')
-        plt.legend(ncol=2)  
-        plt.xlabel('dB re Masker')  
-        plt.ylabel('Percentage correct [%]')    
-        plt.ylim((30, 100))
-        plt.xlim((min(dB_list)-1, max(dB_list)+1))  
-        plt.subplot(1,2,2)
-        plt.legend(ncol=2)
-        plt.title('Old softmax')
-        plt.xlabel('dB re Masker')  
-        plt.ylabel('Percentage correct [%]')
-        plt.ylim((30, 100))
-        plt.xlim((min(dB_list)-1, max(dB_list)+1))
-        plt.suptitle(f'Scaling factor sigma: {scaling_factor_sigma}')
-        collected.savefig(save_dir_figure + '/3AFC_collected_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature_list) + '.png')
+            if temperature == temperature_list[-1]:
+                plt.suptitle(f'Scaling factor sigma: {scaling_factor_sigma}')
+                plt.subplot(1,3,3)
+                plt.scatter(x=dB_list, y=percentage_correct_Hamacher_matrix*100, label=f'Version with only sigma', color=custom_palette[temperature_list.index(temperature)])
+                try:
+                    plt.plot(sorted_x, y_sig_Hamacher, color=custom_palette[temperature_list.index(temperature)])
+                except:
+                    print('No fit')
+                plt.title(f'Original Hamacher')
+                for subplot in [1,2,3]:
+                    plt.subplot(1,3,subplot)
+                    plt.legend(ncol=2)  
+                    plt.xlabel('dB re Masker')  
+                    plt.ylabel('Percentage correct [%]')    
+                    plt.ylim((30, 101))
+                    plt.xlim((min(dB_list)-1, max(dB_list)+1))  
+            
+            collected.savefig(save_dir_figure + '/3AFC_collected_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature_list) + '.png')
 
 
     plt.show()

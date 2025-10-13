@@ -8,6 +8,7 @@ from sklearn.metrics import r2_score
 import os 
 import yaml
 import glob
+from random import randrange
 
 
 
@@ -308,12 +309,11 @@ def get_Hamacher_NIR(IR, sigma):
     x=3
     return  NIR 
 
-def iterate_3AFC_memory_softmax_correlation(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False, use_differences = True):
+def Softmax_memory_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False):
     num_remaining_crit_bands, _ = IR_R.shape
     probabilities = np.zeros((n_iter, 3))
 
     plot_X = False
-    use_differences = True
 
     if plot_X:
         while is_prime(num_remaining_crit_bands):
@@ -325,13 +325,13 @@ def iterate_3AFC_memory_softmax_correlation(IR_RT, IR_R, S, sigma_w, temperature
     for i in range(n_iter):
         NIR_RT = get_Hamacher_NIR(IR_RT, sigma=sigma_w)
         # S = IR_RT - IR_R 
-        X_RT = NIR_RT #- IR_R
+        X_RT = NIR_RT - IR_R
         
         # create 2 alternatives
         NIR_R1 = get_Hamacher_NIR(IR_R, sigma=sigma_w)
-        X_R1 = NIR_R1 #-IR_R
+        X_R1 = NIR_R1 -IR_R
         NIR_R2 = get_Hamacher_NIR(IR_R, sigma=sigma_w)
-        X_R2 = NIR_R2 #-IR_R
+        X_R2 = NIR_R2 -IR_R
 
         score_matrix = np.zeros((num_remaining_crit_bands, 3))
         for c in range(num_remaining_crit_bands):
@@ -370,19 +370,7 @@ def iterate_3AFC_memory_softmax_correlation(IR_RT, IR_R, S, sigma_w, temperature
                 measure_R1 = r2_score(S_k, X_R1[c,:])
                 measure_R2 =  r2_score(S_k, X_R2[c,:])
 
-            if use_differences:
-                # RT-R1
-                diff_RTR1 = measure_RT - measure_R1
-                # RT-R2
-                diff_RTR2 = measure_RT - measure_R2
-                # R1-R2
-                diff_R1R2 = measure_R1 - measure_R2
-                # no content in higher bands so replace correlation with 0 
-                score_matrix[c, :] = np.nan_to_num([np.mean((diff_RTR1, diff_RTR2)), diff_R1R2, diff_R1R2], nan=0.0)
-                # MAYBE I SHOULD JUST DELETE THESE ROWS
-            else:
-                # measures per critical band
-                score_matrix[c, :] = np.nan_to_num([measure_RT, measure_R1, measure_R2], nan=0.0) # replace nan with 0 
+            score_matrix[c, :] = np.nan_to_num([measure_RT, measure_R1, measure_R2], nan=0.0) # replace nan with 0 
 
         if norm_bool:
             # Subtract the maximum score for numerical stability 
@@ -406,12 +394,18 @@ def iterate_3AFC_memory_softmax_correlation(IR_RT, IR_R, S, sigma_w, temperature
     return np.mean(probabilities[:,0])
 
 
-def Hamacher_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False, use_differences = True):
+def Hamacher_3AFC(IR_RT, IR_R, sigma_w, measure='pearson', n_iter=100, use_De=False):
     num_remaining_crit_bands, _ = IR_R.shape
     probabilities = np.zeros((n_iter, 3))
+    AFC_matrix = np.zeros((num_remaining_crit_bands, 3))
+    AFC_correlation_matrix = np.zeros((n_iter, 3))
+    correlation_matrix = np.zeros((n_iter, num_remaining_crit_bands, 3))
+    max_content_crit = np.zeros((n_iter, num_remaining_crit_bands, 3))
+    AFC_content_matrix = np.zeros((n_iter, 3))
 
     plot_X = False
-    use_differences = True
+
+    S = IR_RT - IR_R
 
     if plot_X:
         while is_prime(num_remaining_crit_bands):
@@ -423,13 +417,13 @@ def Hamacher_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_ite
     for i in range(n_iter):
         NIR_RT = get_Hamacher_NIR(IR_RT, sigma=sigma_w)
         # S = IR_RT - IR_R 
-        X_RT = NIR_RT #- IR_R
+        X_RT = NIR_RT - IR_R
         
         # create 2 alternatives
         NIR_R1 = get_Hamacher_NIR(IR_R, sigma=sigma_w)
-        X_R1 = NIR_R1 #-IR_R
+        X_R1 = NIR_R1 -IR_R
         NIR_R2 = get_Hamacher_NIR(IR_R, sigma=sigma_w)
-        X_R2 = NIR_R2 #-IR_R
+        X_R2 = NIR_R2 -IR_R
 
         score_matrix = np.zeros((num_remaining_crit_bands, 3))
         for c in range(num_remaining_crit_bands):
@@ -468,30 +462,24 @@ def Hamacher_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_ite
                 measure_R1 = r2_score(S_k, X_R1[c,:])
                 measure_R2 =  r2_score(S_k, X_R2[c,:])
 
-            if use_differences:
-                # RT-R1
-                diff_RTR1 = measure_RT - measure_R1
-                # RT-R2
-                diff_RTR2 = measure_RT - measure_R2
-                # R1-R2
-                diff_R1R2 = measure_R1 - measure_R2
-                # no content in higher bands so replace correlation with 0 
-                score_matrix[c, :] = np.nan_to_num([np.mean((diff_RTR1, diff_RTR2)), diff_R1R2, diff_R1R2], nan=0.0)
-                # MAYBE I SHOULD JUST DELETE THESE ROWS
-            else:
-                # measures per critical band
-                score_matrix[c, :] = np.nan_to_num([measure_RT, measure_R1, measure_R2], nan=0.0) # replace nan with 0 
+            # measures per critical band
+            # score_matrix[c, :] = np.nan_to_num([measure_RT, measure_R1, measure_R2], nan=0.0) # replace nan with 0 
 
-        if norm_bool:
-            # Subtract the maximum score for numerical stability 
-            # This prevents overflow in the exponentiation step
-            max_score = np.max(score_matrix, axis=1, keepdims=True) 
-            score_matrix -= max_score 
-
-        # Apply softmax formula
-        expScores = np.exp(-score_matrix / temperature) #Using negative to invert the effect, lower MI -> higher score
-        probabilities[i,:] = 1 - (np.nanmean(expScores / np.sum(expScores, axis=1, keepdims=True),axis=0))
-        x=3
+            # measures per critical band
+            max_idx = np.argmax(np.array([measure_RT, measure_R1, measure_R2]))
+            correlation_matrix[i, c, :] = np.nan_to_num([measure_RT, measure_R1, measure_R2], nan=0.0) # replace nan with 0 
+            # print(np.nan_to_num([measure_RT, measure_R1, measure_R2], nan=0.0))
+            AFC_matrix[c, max_idx] += 1
+   
+        # measures per trial based on correlation
+        if sum(np.max(np.squeeze(correlation_matrix[i,:,:]), axis=0)) == 0:
+            max_column = randrange(3)
+        else:
+            max_column = np.argmax(np.max(np.squeeze(correlation_matrix[i,:,:]), axis=0))
+        AFC_correlation_matrix[i, max_column] += 1
+        # measures per trial based on content
+        max_column = np.argmax(np.max(np.squeeze(max_content_crit[i,:,:]), axis=0))
+        AFC_content_matrix[i, max_column] += 1
 
     if plot_X:
         # Put a legend to the right of the current axis
@@ -501,4 +489,4 @@ def Hamacher_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_ite
         fig.text(0.5, 0.04, 'Time [s]', ha='center', fontsize=font_size)
 
     x=3
-    return np.mean(probabilities[:,0])
+    return np.sum(AFC_correlation_matrix, axis=0)[0]/n_iter
