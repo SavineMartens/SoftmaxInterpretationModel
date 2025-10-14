@@ -138,20 +138,24 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
         IR_pattern = f"*{sound_name}*_{num_fibers}CFs_*bands_TP2_{TP2_cut_off_Hz}Hz.npy"
         existing_IRs = glob.glob(os.path.join(save_dir_IR, IR_pattern))
 
-        if existing_neurograms and not existing_IRs:
-            neurogram_path = existing_neurograms[0]
-            print(f"🧠 Found existing neurogram: {os.path.basename(neurogram_path)}")
-            time_stamp = os.path.basename(neurogram_path).split(sound_name)[0]
-            neurogram = np.load(neurogram_path)
-            IR = compute_internal_representation_from_numpy(neurogram=neurogram,
-                                                            Fs_neurogram=Fs,
-                                                            fiber_frequencies=frequencies,
-                                                            TP2_cut_off_Hz=TP2_cut_off_Hz,
-                                                            plot_IR=plot_files)
-            num_bands, _ = IR.shape
-            IR_filename = f"{sound_name}_IR_{num_fibers}CFs_{num_bands}bands_TP2_{TP2_cut_off_Hz}Hz.npy"
-            IR_path = os.path.join(save_dir_IR, time_stamp + IR_filename)
-            save_numpy(IR, IR_path)
+        if existing_neurograms:
+            if existing_IRs:
+                print(f"🧠 IR already exists: {os.path.basename(existing_IRs[0])}, skipping.")
+                continue
+            else:
+                neurogram_path = existing_neurograms[0]
+                print(f"🧠 Found existing neurogram: {os.path.basename(neurogram_path)}")
+                time_stamp = os.path.basename(neurogram_path).split(sound_name)[0]
+                neurogram = np.load(neurogram_path)
+                IR = compute_internal_representation_from_numpy(neurogram=neurogram,
+                                                                Fs_neurogram=Fs,
+                                                                fiber_frequencies=frequencies,
+                                                                TP2_cut_off_Hz=TP2_cut_off_Hz,
+                                                                plot_IR=plot_files)
+                num_bands, _ = IR.shape
+                IR_filename = f"{sound_name}_IR_{num_fibers}CFs_{num_bands}bands_TP2_{TP2_cut_off_Hz}Hz.npy"
+                IR_path = os.path.join(save_dir_IR, time_stamp + IR_filename)
+                save_numpy(IR, IR_path)
 
         else:
             print("🧠 Generating new neurogram...")
@@ -198,7 +202,7 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create data for normal or electric hearing.")
     parser.add_argument("--hearing", type=str, choices=["NH", "EH"], default="NH", help="Type of hearing to simulate")
-    parser.add_argument("--test", type=str, choices=["AM", "MP"], default="AM", help="Test type")
+    parser.add_argument("--test", type=str, choices=["AM", "MP"], default="MP", help="Test type")
     parser.add_argument("--create-files", type=lambda x: x.lower() == "true", default=True, help="Whether to generate data")
     parser.add_argument("--plot-files", type=lambda x: x.lower() == "true", default=True, help="Whether to plot IRs/neurograms")
     args = parser.parse_args()
