@@ -4,6 +4,8 @@ paper/
 logs/
 
 # large folders
+AM/
+MP/
 neurograms/
 MP/NH/neurograms/
 AM/NH/neurograms/
