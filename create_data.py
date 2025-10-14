@@ -32,10 +32,10 @@ def get_frequencies_and_fibers(hearing_type):
     fiber_ids = np.load('./data/fiber_ID_list_FFT.npy')
 
     # Select half of the fibers for EH
-    if hearing_type == 'EH':
-        frequencies = frequencies[::2]
-        fiber_ids = fiber_ids[::2]
-    else:
+    # if hearing_type == 'EH':
+    #     frequencies = frequencies[::2]
+    #     fiber_ids = fiber_ids[::2]
+    if hearing_type == 'NH':
         # NH only needs frequencies, Bruce-Zilany handles fibers internally
         fiber_ids = None
 
@@ -62,7 +62,7 @@ def save_numpy(data, path):
 # Processing functions
 # ------------------------------------------------------------------------------
 
-def process_electric_hearing(test, create_files=False, plot_files=True):
+def process_electric_hearing(test, create_files=False, plot_files=True, TP2_cut_off_Hz=500):
     """Process data for electric hearing (EH)."""
     save_dir_neuro = f'./{test}/EH/neurograms/'
     save_dir_IR = f'./{test}/EH/IR/'
@@ -94,7 +94,7 @@ def process_electric_hearing(test, create_files=False, plot_files=True):
                                           + f'_{num_fibers}CFs.npy')
             IR_path = os.path.join(save_dir_IR,
                                    os.path.basename(file).replace('spike_trains_F120', 'neurogram')
-                                   + f'_{num_fibers}CFs_{IR.shape[0]}bands.npy')
+                                   + f'_{num_fibers}CFs_{IR.shape[0]}bands_TP2_{TP2_cut_off_Hz}Hz.npy')
 
             save_numpy(neurogram, neurogram_path)
             save_numpy(IR, IR_path)
@@ -108,11 +108,11 @@ def process_electric_hearing(test, create_files=False, plot_files=True):
             fig = plot_single_internal_representation(IR, t, freqs, font_size=14)
             plt.suptitle(os.path.basename(file).replace('.npy', ''), fontsize=14)
             plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-            plt.savefig(file.replace('.npy', '.png'))
+            # plt.savefig(file.replace('.npy', '.png'))
         plt.show()
 
 
-def process_normal_hearing(test, create_files=False, plot_files=True):
+def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_off_Hz=500):
     """Process data for normal hearing (NH) using Bruce–Zilany model."""
     if stimulus is None:
         raise ImportError("Bruce–Zilany model not installed or imported correctly.")
@@ -122,42 +122,69 @@ def process_normal_hearing(test, create_files=False, plot_files=True):
     ensure_dirs(save_dir_neuro, save_dir_IR)
 
     frequencies, _ = get_frequencies_and_fibers('NH')
+    num_fibers = len(frequencies)
     Fs = 1e4
 
     sound_files = sorted(glob.glob(f'./sounds/{test}/*reference91*.wav'))
     print(f'Found {len(sound_files)} sound files for NH.')
 
     for i, file_path in enumerate(sound_files):
-        sound_name = os.path.basename(file_path)
+        sound_name = os.path.basename(file_path).replace('.wav', '')
         print(f'[{i+1}/{len(sound_files)}] Processing {sound_name}')
 
-        stim = load_stimulus(file_path, trim_reference=0.25)
-        ng = Neurogram(frequencies, n_low=10, n_med=10, n_high=30)
-        ng.bin_width = 1 / Fs
-        ng.create(sound_wave=stim, species=Species.HUMAN_SHERA, n_trials=1)
+        # Build expected neurogram filename pattern
+        neurogram_pattern = f"*{sound_name}*_{num_fibers}CFs.npy"
+        existing_neurograms = glob.glob(os.path.join(save_dir_neuro, neurogram_pattern))
 
-        if plot_files:
-            plt.figure()
-            t = np.arange(ng.get_output().shape[2]) * ng.bin_width
-            plt.pcolormesh(t, frequencies, ng.get_output().mean(axis=1), cmap='viridis', shading='auto')
-            plt.title(sound_name)
-            plt.xlabel('Time (s)')
-            plt.ylabel('Frequency (Hz)')
-            plt.colorbar(label='Rate')
+        if existing_neurograms:
+            neurogram_path = existing_neurograms[0]
+            print(f"🧠 Found existing neurogram: {os.path.basename(neurogram_path)}")
+            time_stamp = os.path.basename(neurogram_path).split(sound_name)[0]
+            neurogram = np.load(neurogram_path)
+            IR = compute_internal_representation_from_numpy(neurogram=neurogram,
+                                                            Fs_neurogram=Fs,
+                                                            fiber_frequencies=frequencies,
+                                                            TP2_cut_off_Hz=TP2_cut_off_Hz,
+                                                            plot_IR=plot_files)
+            num_bands, _ = IR.shape
+            IR_filename = f"{sound_name}_IR_{num_fibers}CFs_{num_bands}bands_TP2_{TP2_cut_off_Hz}Hz.npy"
+            IR_path = os.path.join(save_dir_IR, time_stamp + IR_filename)
+            save_numpy(IR, IR_path)
 
-        # Save neurogram
-        num_fibers = len(frequencies)
-        now = get_time_str(seconds=True)
-        neuro_path = os.path.join(save_dir_neuro, f'{now}_{sound_name.replace(".wav","")}_neurogram_{num_fibers}CFs.npy')
-        save_numpy(ng.get_output(), neuro_path)
+        else:
+            print("🧠 Generating new neurogram...")
+            stim = load_stimulus(file_path, trim_reference=0.25)
+            ng = Neurogram(frequencies, n_low=10, n_med=10, n_high=30)
+            ng.bin_width = 1 / Fs
+            ng.create(sound_wave=stim, species=Species.HUMAN_SHERA, n_trials=1)
 
-        # Compute and save IR
-        IR = compute_internal_representation_from_object(ng, frequencies)
-        num_bands, _ = IR.shape
-        IR_path = os.path.join(save_dir_IR, f'{now}_{sound_name.replace(".wav","")}_IR_{num_fibers}CFs_{num_bands}bands.npy')
-        save_numpy(IR, IR_path)
+            # Save neurogram
+            now = get_time_str(seconds=True)
+            neuro_path = os.path.join(save_dir_neuro, f'{now}_{sound_name}_neurogram_{num_fibers}CFs.npy')
+            save_numpy(ng.get_output(), neuro_path)
 
-        del ng, stim, IR
+            # Compute and save IR
+            IR = compute_internal_representation_from_object(ng, frequencies)
+            num_bands, _ = IR.shape
+            IR_path = os.path.join(save_dir_IR, f'{now}_{sound_name}_IR_{num_fibers}CFs_{num_bands}bands_TP2_{TP2_cut_off_Hz}Hz.npy')
+            save_numpy(IR, IR_path)
+            
+
+            if plot_files:
+                plt.figure()
+                t = np.arange(ng.get_output().shape[2]) * ng.bin_width
+                plt.pcolormesh(t, frequencies, ng.get_output().mean(axis=1), cmap='viridis', shading='auto')
+                plt.title(sound_name)
+                plt.xlabel('Time (s)')
+                plt.ylabel('Frequency (Hz)')
+                plt.colorbar(label='Rate')
+            del ng, stim, IR
+
+
+
+
+
+        
 
     if plot_files:
         plt.show()
@@ -174,9 +201,11 @@ if __name__ == "__main__":
     parser.add_argument("--plot-files", type=lambda x: x.lower() == "true", default=True, help="Whether to plot IRs/neurograms")
     args = parser.parse_args()
 
+    TP2_cut_off_Hz = 500  # Hz
+
     print(f"\n Running {args.test} for {args.hearing} (create_files={args.create_files}, plot_files={args.plot_files})\n")
 
     if args.hearing == "EH":
-        process_electric_hearing(args.test, args.create_files, args.plot_files)
+        process_electric_hearing(args.test, args.create_files, args.plot_files, TP2_cut_off_Hz)
     else:
-        process_normal_hearing(args.test, args.create_files, args.plot_files)
+        process_normal_hearing(args.test, args.create_files, args.plot_files, TP2_cut_off_Hz)

@@ -112,10 +112,17 @@ def compute_internal_representation_from_object(neurogram,
 
     dt = neurogram.bin_width
     num_fibers, num_trials, num_samples = neurogram.get_output().shape
-    spike_matrix = neurogram.get_output().mean(axis=1) # average across trials
+    neurogram = neurogram.get_output().mean(axis=1) # average across trials
+
     # if still in 3 dimensions
-    if len(spike_matrix.shape) == 3:
-        spike_matrix = np.squeeze(spike_matrix)
+    if len(neurogram.shape) == 3:
+        neurogram = np.squeeze(neurogram)
+    
+    # TP1 Gaussian filter
+    spike_matrix = np.zeros(neurogram.shape)
+    for fiber in np.arange(len(fiber_frequencies)):
+        spike_matrix[fiber,:] = discrete_gaussian_filter(neurogram[fiber,:], dt, sigma_c=1e-3)
+
     # to critical bands
     SR, _, _, edge_frequency_critical_bands = select_critical_bands(spike_matrix, fiber_frequencies, type=critical_band_type, num_critical_bands=num_critical_bands)
 
@@ -171,10 +178,15 @@ def compute_internal_representation_from_numpy(neurogram,
 
     dt = 1/Fs_neurogram
     num_fibers, num_trials, num_samples = neurogram.shape
-    spike_matrix = neurogram.mean(axis=1) # average across trials
+    neurogram = neurogram.mean(axis=1) # average across trials
     # if still in 3 dimensions
-    if len(spike_matrix.shape) == 3:
-        spike_matrix = np.squeeze(spike_matrix)
+    if len(neurogram.shape) == 3:
+        neurogram = np.squeeze(neurogram)
+
+    # TP1 Gaussian filter
+    spike_matrix = np.zeros(neurogram.shape)
+    for fiber in np.arange(len(fiber_frequencies)):
+        spike_matrix[fiber,:] = discrete_gaussian_filter(neurogram[fiber,:], dt, sigma_c=1e-3)
 
     SR, _, _, edge_frequency_critical_bands = select_critical_bands(spike_matrix, fiber_frequencies, type=critical_band_type, num_critical_bands=num_critical_bands)
 
