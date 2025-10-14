@@ -35,24 +35,34 @@ if __name__ == "__main__":
     cmap = plt.get_cmap('viridis', len(sigma_values))
     colors = [cmap(i) for i in range(cmap.N)]
 
-    plt.figure(f'Psychometric Curve - {hearing} - {test}: fixed sigma', figsize=(10, 6))
+    Hamacher_sigma_list = []
+
     for file in all_files:
-        data = np.load(file, allow_pickle=True)
+        data = np.load(file, allow_pickle=True).item()
         temp = data['temperature']
         sigma = data['sigma_SF']
 
-        # figure Hamacher RTmax 
-        plt.figure(f'Hamacher RTmax and RT - {hearing} - {test}', figsize=(10, 6))
-        plt.subplot(1,2,1)
-        plt.plot(data['dB_list'], data['y_Hamacher_RTmax'], label=f'RTmax - σ={sigma}', color=colors[np.where(sigma_values == sigma)[0][0]])
-        plt.xlabel('dB re Masker')
-        plt.ylabel('Percentage correct [%]')
-        plt.title('Hamacher: RTmax')
-        plt.subplot(1,2,2)
-        plt.plot(data['dB_list'], data['y_Hamacher'], label=f'RT - σ={sigma}', color=colors[np.where(sigma_values == sigma)[0][0]])
-        plt.xlabel('dB re Masker')
-        plt.ylabel('Percentage correct [%]')
-        plt.tite('Hamacher: RT')
+        if sigma not in Hamacher_sigma_list:
+            Hamacher_sigma_list.append(sigma)
+
+            # figure Hamacher RTmax 
+            plt.figure(f'Hamacher RTmax and RT - {hearing} - {test}', figsize=(10, 6))
+            plt.subplot(1,2,1)
+            plt.scatter(data['dB_list'], data['y_Hamacher_RTmax'], label=f'σ={sigma}', color=colors[np.where(sigma_values == sigma)[0][0]])
+            # plt.plot(data['dB_list'], data['y_fit_Hamacher_RTmax'], color=colors[np.where(sigma_values == sigma)[0][0]])
+            plt.xlabel('dB re Masker')
+            plt.ylabel('Percentage correct [%]')
+            plt.title('Hamacher: RTmax')
+            plt.ylim((30, 101))
+            plt.legend()
+            plt.subplot(1,2,2)
+            plt.scatter(data['dB_list'], data['y_Hamacher_RT'], label=f'σ={sigma}', color=colors[np.where(sigma_values == sigma)[0][0]])
+            # plt.plot(data['dB_list'], data['y_fit_Hamacher_RT'], color=colors[np.where(sigma_values == sigma)[0][0]])
+            plt.xlabel('dB re Masker')
+            plt.title('Hamacher: RT')
+            plt.ylim((30, 101))
+            plt.legend()
+
 
         # # figure comparing Hamacher_RT and Hamacher_RTmax
         # plt.figure(f'Hamacher Comparison - {hearing} - {test}', figsize=(10, 6))
@@ -79,3 +89,5 @@ if __name__ == "__main__":
         # plt.legend()
         # plt.grid()
         # plt.show()
+
+plt.show()
