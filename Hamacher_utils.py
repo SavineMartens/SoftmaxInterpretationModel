@@ -406,7 +406,7 @@ def Softmax_memory_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson',
     return np.mean(probabilities[:,0])
 
 
-def Hamacher_3AFC(IR_RT, IR_R, sigma_w, measure='pearson', n_iter=100, use_De=False):
+def Hamacher_3AFC(IR_RT, IR_R, S, sigma_w, measure='pearson', n_iter=100, use_De=False):
     num_remaining_crit_bands, _ = IR_R.shape
     probabilities = np.zeros((n_iter, 3))
     AFC_matrix = np.zeros((num_remaining_crit_bands, 3))
@@ -417,7 +417,7 @@ def Hamacher_3AFC(IR_RT, IR_R, sigma_w, measure='pearson', n_iter=100, use_De=Fa
 
     plot_X = False
 
-    S = IR_RT - IR_R
+    # S = IR_RT - IR_R
 
     if plot_X:
         while is_prime(num_remaining_crit_bands):
