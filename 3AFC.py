@@ -101,6 +101,7 @@ if __name__ == "__main__":
         percentage_correct_memory_matrix = np.zeros((len(files), len(temperature_list)))
         percentage_correct_old_softmax_matrix = np.zeros((len(files), len(temperature_list)))
         percentage_correct_Hamacher_matrix = np.zeros(len(files))
+        percentage_correct_Hamacher_RTmax_matrix = np.zeros(len(files))
 
         plt.figure('Hamacher collected', figsize=(8, 8))
 
@@ -112,8 +113,10 @@ if __name__ == "__main__":
             dB_list.append(dB)
 
             # Hamacher
-            percentage_correct_Hamacher = Hamacher_3AFC(IR_RT, IR_R, sigma_w, measure='pearson', n_iter=100, use_De=False)
+            percentage_correct_Hamacher = Hamacher_3AFC(IR_RT, IR_R,  IR_RT - IR_R, sigma_w, measure='pearson', n_iter=100, use_De=False)
             percentage_correct_Hamacher_matrix[f] = percentage_correct_Hamacher
+            percentage_correct_Hamacher_RTmax = Hamacher_3AFC(IR_RT_max, IR_R,  IR_RT_max - IR_R, sigma_w, measure='pearson', n_iter=100, use_De=False)
+            percentage_correct_Hamacher_RTmax_matrix[f] = percentage_correct_Hamacher_RTmax
 
             plt.figure('Hamacher collected')
             plt.scatter(x=dB, y=percentage_correct_Hamacher*100, color=custom_palette_scaling[scaling_factor_sigma_list.index(scaling_factor_sigma)])
@@ -161,7 +164,7 @@ if __name__ == "__main__":
 
             # saving data to pandas
             dict_pd = dict(zip(sorted_x, sorted_y_memory))
-            dict_pd.update({"sorted_old_softmax": sorted_y_old_softmax,
+            dict_pd.update({"sorted_old_softmax": zip(sorted_x,sorted_y_old_softmax),
                             "sorted_Hamacher": sorted_y_Hamacher,
                             "fit_memory" : y_sig_memory if 'y_sig' in locals() else 'no_fit',
                             "fit_old_softmax" : y_sig_old_softmax if 'y_sig' in locals() else 'no_fit',

@@ -135,8 +135,10 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
         # Build expected neurogram filename pattern
         neurogram_pattern = f"*{sound_name}*_{num_fibers}CFs.npy"
         existing_neurograms = glob.glob(os.path.join(save_dir_neuro, neurogram_pattern))
+        IR_pattern = f"*{sound_name}*_{num_fibers}CFs_*bands_TP2_{TP2_cut_off_Hz}Hz.npy"
+        existing_IRs = glob.glob(os.path.join(save_dir_IR, IR_pattern))
 
-        if existing_neurograms:
+        if existing_neurograms and not existing_IRs:
             neurogram_path = existing_neurograms[0]
             print(f"🧠 Found existing neurogram: {os.path.basename(neurogram_path)}")
             time_stamp = os.path.basename(neurogram_path).split(sound_name)[0]
