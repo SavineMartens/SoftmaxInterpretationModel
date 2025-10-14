@@ -151,6 +151,7 @@ if __name__ == "__main__":
             sorted_y_memory = y_list_memory[np.array(dB_list).argsort(),t]
             sorted_y_old_softmax = y_list_old_softmax[np.array(dB_list).argsort(),t]
             sorted_y_Hamacher = percentage_correct_Hamacher_matrix[np.array(dB_list).argsort()]*100
+            sorted_y_Hamacher_RTmax = percentage_correct_Hamacher_RTmax_matrix[np.array(dB_list).argsort()]*100
             try:
                 y_sig_memory = fit_sigmoid(sorted_x, sorted_y_memory)
                 plt.plot(sorted_x, y_sig_memory, color='blue')
@@ -158,25 +159,28 @@ if __name__ == "__main__":
                 plt.plot(sorted_x, y_sig_old_softmax, color='red')
                 y_sig_Hamacher = fit_sigmoid(sorted_x, sorted_y_Hamacher)
                 plt.plot(sorted_x, y_sig_Hamacher, color='green')
+                y_sig_Hamacher_RTmax = fit_sigmoid(sorted_x, sorted_y_Hamacher_RTmax)
+                plt.plot(sorted_x, y_sig_Hamacher_RTmax, color='orange')
             except:
                 print('Could not find psychometric fit')
 
 
-            # saving data to pandas
-            dict_pd = dict(zip(sorted_x, sorted_y_memory))
-            dict_pd.update({"sorted_old_softmax": zip(sorted_x,sorted_y_old_softmax),
-                            "sorted_Hamacher": sorted_y_Hamacher,
-                            "fit_memory" : y_sig_memory if 'y_sig' in locals() else 'no_fit',
-                            "fit_old_softmax" : y_sig_old_softmax if 'y_sig' in locals() else 'no_fit',
-                            "fit_Hamacher" : y_sig_Hamacher if 'y_sig' in locals() else 'no_fit',
-                            "temperature": temperature,
-                            "sigma_SF": scaling_factor_sigma})
-            dict_pd = pd.DataFrame(dict_pd.items())
-            dict_pd = dict_pd.transpose()
-            dict_pd.columns = dict_pd.iloc[0]
-            dict_pd = dict_pd.drop(dict_pd.index[[0]])
+            # saving data to dictionary
+            data_dict = dict()
+            data_dict.update({"dB_list": sorted_x,
+                             "y_soft_RTmax": sorted_y_memory,
+                             "y_soft_RT": sorted_y_old_softmax,
+                             "y_Hamacher_RT": sorted_y_Hamacher,
+                             "y_Hamacher_RTmax": sorted_y_Hamacher_RTmax,
+                             "y_fit_soft_RTmax": y_sig_memory if 'y_sig_memory' in locals() else 'no_fit',
+                             "y_fit_soft_RT" : y_sig_old_softmax if 'y_sig_old_softmax' in locals() else 'no_fit',
+                             "y_fit_Hamacher_RT" : y_sig_Hamacher if 'y_sig_Hamacher' in locals() else 'no_fit',
+                             "y_fit_Hamacher_RTmax" : y_sig_Hamacher_RTmax if 'y_sig_Hamacher_RTmax' in locals() else 'no_fit',
+                             "temperature": temperature,
+                             "sigma_SF": scaling_factor_sigma})
+
             single_run.savefig(save_dir_figure + '/3AFC_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature) + '.png')            
-            np.save(save_dir_results + '/3AFC_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) + '.npy', dict_pd)
+            np.save(save_dir_results + '/3AFC_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) + '.npy', data_dict)
 
             plt.figure(f'{hearing}: Collected with {scaling_factor_sigma}')
             plt.subplot(1,3,1)

@@ -37,6 +37,45 @@ if __name__ == "__main__":
 
     plt.figure(f'Psychometric Curve - {hearing} - {test}: fixed sigma', figsize=(10, 6))
     for file in all_files:
-        data = np.load(file, allow_pickle=True).item()
+        data = np.load(file, allow_pickle=True)
+        temp = data['temperature']
+        sigma = data['sigma_SF']
 
+        # figure Hamacher RTmax 
+        plt.figure(f'Hamacher RTmax and RT - {hearing} - {test}', figsize=(10, 6))
+        plt.subplot(1,2,1)
+        plt.plot(data['dB_list'], data['y_Hamacher_RTmax'], label=f'RTmax - σ={sigma}', color=colors[np.where(sigma_values == sigma)[0][0]])
+        plt.xlabel('dB re Masker')
+        plt.ylabel('Percentage correct [%]')
+        plt.title('Hamacher: RTmax')
+        plt.subplot(1,2,2)
+        plt.plot(data['dB_list'], data['y_Hamacher'], label=f'RT - σ={sigma}', color=colors[np.where(sigma_values == sigma)[0][0]])
+        plt.xlabel('dB re Masker')
+        plt.ylabel('Percentage correct [%]')
+        plt.tite('Hamacher: RT')
 
+        # # figure comparing Hamacher_RT and Hamacher_RTmax
+        # plt.figure(f'Hamacher Comparison - {hearing} - {test}', figsize=(10, 6))
+        # for file in all_files:
+        #     data = np.load(file, allow_pickle=True).item()
+        #     plt.plot(data['x'], data['y_Hamacher_RT'], label=f'RT')
+        #     plt.plot(data['x'], data['y_Hamacher_RTmax'], label=f'Hamacher_RTmax - {file}', linestyle='--')
+        # plt.xlabel('dB re Masker')
+        # plt.ylabel('Percentage correct [%]')
+        # plt.title(f'Hamacher Comparison: RT vs RT_max - {hearing} - {test}')
+        # plt.legend()
+        # plt.grid()
+        # plt.show()
+
+        # # figure comparing softmax_RT and softmax_RTmax
+        # plt.figure(f'Softmax Comparison - {hearing} - {test}', figsize=(10, 6))
+        # for file in all_files:
+        #     data = np.load(file, allow_pickle=True).item()
+        #     plt.plot(data['x'], data['y_softmax_RT'], label=f'Softmax_RT - {file}')
+        #     plt.plot(data['x'], data['y_softmax_RTmax'], label=f'Softmax_RTmax - {file}', linestyle='--')
+        # plt.xlabel('dB re Masker')
+        # plt.ylabel('Percentage correct [%]')
+        # plt.title(f'Softmax Comparison - {hearing} - {test}')
+        # plt.legend()
+        # plt.grid()
+        # plt.show()
