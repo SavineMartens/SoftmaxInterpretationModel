@@ -29,27 +29,29 @@ if __name__ == "__main__":
     test = args.test
     hearing = args.hearing
     dir_to_loop = './' + test + '/' + hearing + '/IR/'
+    TP2_cut_off_Hz = 500
+    num_fibers = 1903# 952
 
     if test == 'AM':
         if hearing == 'NH':
-            wildcard_R = '*unmodulated*reference91*.npy'
-            wildcard_RT_max = '*modulated*reference91*_0dB*.npy'
+            wildcard_R = f'*unmodulated*reference91*'
+            wildcard_RT_max = f'*modulated*reference91*_0dB*'
             wildcard_dB_start = '91_'
             wildcard_dB_end = 'dB_IR'
         if hearing == 'EH':
-            wildcard_R = '*unmodulated*reference1*.npy'
-            wildcard_RT_max = '*modulated*reference1*_0dB*.npy'
+            wildcard_R = f'*unmodulated*reference1*'
+            wildcard_RT_max = f'*modulated*reference1*_0dB*'
             wildcard_dB_start = 'reference1_'
             wildcard_dB_end = 'dB_relscale'
     if test == 'MP':
         if hearing == 'NH':
-            wildcard_R = '*masker_reference91_65_*.npy'
-            wildcard_RT_max = '*masker_reference91_65dB_probe_65dB*.npy'
+            wildcard_R = f'*masker_reference91_65_*'
+            wildcard_RT_max = f'*masker_reference91_65dB_probe_65dB*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_IR'
         if hearing == 'EH':
-            wildcard_R = '*masker_reference1_rel*.npy'
-            wildcard_RT_max = '*masker_reference1_*probe_0*.npy'
+            wildcard_R = f'*masker_reference1_rel*'
+            wildcard_RT_max = f'*masker_reference1_*probe_0*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_relscale'
     
@@ -64,14 +66,14 @@ if __name__ == "__main__":
         dB_correction = 0
 
     # get R and RT_max
-    R_name = glob.glob(os.path.join(dir_to_loop, wildcard_R))[0]
-    RT_max_name = glob.glob(os.path.join(dir_to_loop, wildcard_RT_max))[0]
+    R_name = glob.glob(os.path.join(dir_to_loop, wildcard_R + f'*{num_fibers}CFs*{TP2_cut_off_Hz}Hz.npy'))[0]
+    RT_max_name = glob.glob(os.path.join(dir_to_loop, wildcard_RT_max + f'*{num_fibers}CFs*{TP2_cut_off_Hz}Hz.npy'))[0]
     IR_R = np.load(R_name)
     IR_RT_max = np.load(RT_max_name)
     
     # S memory in softmax
     S = IR_RT_max - IR_R
-    files = glob.glob(dir_to_loop + '*.npy')
+    files = glob.glob(dir_to_loop + f'*{num_fibers}CFs*{TP2_cut_off_Hz}Hz.npy')
     files.remove(R_name)    
     if platform.system() == 'Windows':
         scaling_factor_sigma_list = [0.2, 2.2]
