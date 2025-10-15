@@ -391,8 +391,8 @@ def Softmax_memory_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson',
             score_matrix -= max_score 
 
         # Apply softmax formula
-        expScores = np.exp(-score_matrix / temperature) #Using negative to invert the effect, lower MI -> higher score
-        probabilities[i,:] = 1 - (np.nanmean(expScores / np.sum(expScores, axis=1, keepdims=True),axis=0))
+        expScores = np.exp(score_matrix / temperature) #Using negative to invert the effect, lower MI -> higher score
+        probabilities[i,:] = (np.nanmean(expScores / np.sum(expScores, axis=1, keepdims=True),axis=0)) # 1 -??
         x=3
 
     if plot_X:

@@ -10,8 +10,8 @@ from utilities import *
 import platform
 
 # To do
-# [ ] check if RT max in memory causes not to reach 100% accuracy
-# [ ] plot IR!!!
+# [ ] check if RT max in memory causes not to reach 100% accuracy --> caused by temperature
+# [X] plot IR!!!
 # [X] also create OG Hamacher
 # [ ] implement Gumbel distributed noise 
 # [ ] check if this is similar to e-softmax in this paper: https://pmc.ncbi.nlm.nih.gov/articles/PMC5001502/pdf/nihms780191.pdf
@@ -23,14 +23,18 @@ if platform.system() == 'Linux':
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-test', type=str, default='AM', help='AM or MP')
+    parser.add_argument('-test', type=str, default='MP', help='AM or MP')
     parser.add_argument('-hearing', type=str, default='NH', help='NH or EH')
+    parser.add_argument('-norm', type=bool)
     args = parser.parse_args()
     test = args.test
     hearing = args.hearing
     dir_to_loop = './' + test + '/' + hearing + '/IR/'
     TP2_cut_off_Hz = 500
     num_fibers = 1903# 952
+
+    if args.norm:
+        norm_bool = True
 
     if test == 'AM':
         if hearing == 'NH':
@@ -77,7 +81,7 @@ if __name__ == "__main__":
     files.remove(R_name)    
     if platform.system() == 'Windows':
         scaling_factor_sigma_list = [0.2, 2.2]
-        temperature_list = [0.00002, 0.0002]
+        temperature_list = [0.0002, 2.2] #[0.00002, 0.0002]
     else:
         scaling_factor_sigma_list = [0.0001, 0.0010, 0.0030, 0.0090, 0.0270, 0.0810, 0.2430, 0.7290, 2.1870, 6.5610, 19.6830]#np.arange(0.2, 2.2, 0.2)
         temperature_list =  [0.0001, 0.0010, 0.0030, 0.0090, 0.0270, 0.0810, 0.2430, 0.7290, 2.1870, 6.5610, 19.6830] #[0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
@@ -126,10 +130,10 @@ if __name__ == "__main__":
             for t, temperature in enumerate(temperature_list):
                 print(f'scaling factor sigma: {scaling_factor_sigma}, temperature: {temperature}')    
                 # new version: sofmax with memory RT_max
-                percentage_correct_memory = Softmax_memory_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False)          
+                percentage_correct_memory = Softmax_memory_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=norm_bool)          
                 percentage_correct_memory_matrix[f, t] = percentage_correct_memory
                 # new version: softmax with old RT
-                percentage_correct_old_softmax = Softmax_memory_3AFC(IR_RT, IR_R, IR_RT - IR_R, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False)           
+                percentage_correct_old_softmax = Softmax_memory_3AFC(IR_RT, IR_R, IR_RT - IR_R, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=norm_bool)           
                 percentage_correct_old_softmax_matrix[f, t] = percentage_correct_old_softmax
                 
         y_list_memory = percentage_correct_memory_matrix*100
@@ -170,19 +174,20 @@ if __name__ == "__main__":
             # saving data to dictionary
             data_dict = dict()
             data_dict.update({"dB_list": sorted_x,
-                             "y_soft_RTmax": sorted_y_memory,
-                             "y_soft_RT": sorted_y_old_softmax,
-                             "y_Hamacher_RT": sorted_y_Hamacher,
-                             "y_Hamacher_RTmax": sorted_y_Hamacher_RTmax,
-                             "y_fit_soft_RTmax": y_sig_memory if 'y_sig_memory' in locals() else 'no_fit',
-                             "y_fit_soft_RT" : y_sig_old_softmax if 'y_sig_old_softmax' in locals() else 'no_fit',
-                             "y_fit_Hamacher_RT" : y_sig_Hamacher if 'y_sig_Hamacher' in locals() else 'no_fit',
-                             "y_fit_Hamacher_RTmax" : y_sig_Hamacher_RTmax if 'y_sig_Hamacher_RTmax' in locals() else 'no_fit',
-                             "temperature": temperature,
-                             "sigma_SF": scaling_factor_sigma})
+                              "y_soft_RTmax": sorted_y_memory,
+                              "y_soft_RT": sorted_y_old_softmax,
+                              "y_Hamacher_RT": sorted_y_Hamacher,
+                              "y_Hamacher_RTmax": sorted_y_Hamacher_RTmax,
+                              "y_fit_soft_RTmax": y_sig_memory if 'y_sig_memory' in locals() else 'no_fit',
+                              "y_fit_soft_RT" : y_sig_old_softmax if 'y_sig_old_softmax' in locals() else 'no_fit',
+                              "y_fit_Hamacher_RT" : y_sig_Hamacher if 'y_sig_Hamacher' in locals() else 'no_fit',
+                              "y_fit_Hamacher_RTmax" : y_sig_Hamacher_RTmax if 'y_sig_Hamacher_RTmax' in locals() else 'no_fit',
+                              "temperature": temperature,
+                              "sigma_SF": scaling_factor_sigma,
+                              "norm_bool": norm_bool})
 
-            single_run.savefig(save_dir_figure + '/3AFC_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature) + '.png')            
-            np.save(save_dir_results + '/3AFC_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) + '.npy', data_dict)
+            single_run.savefig(save_dir_figure + '/3AFC_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature) +  '_norm_' + str(norm_bool) + '.png')            
+            np.save(save_dir_results + '/3AFC_sigmaSF_' + str(scaling_factor_sigma) + '_temp_' + str(temperature) +  '_norm_' + str(norm_bool) + '.npy', data_dict)
 
             plt.figure(f'{hearing}: Collected with {scaling_factor_sigma}')
             plt.subplot(1,3,1)
@@ -202,9 +207,11 @@ if __name__ == "__main__":
             if temperature == temperature_list[-1]:
                 plt.suptitle(f'Scaling factor sigma: {scaling_factor_sigma}')
                 plt.subplot(1,3,3)
-                plt.scatter(x=dB_list, y=percentage_correct_Hamacher_matrix*100, label=f'Version with only sigma', color=custom_palette_temperature[temperature_list.index(temperature)])
+                plt.scatter(x=dB_list, y=percentage_correct_Hamacher_matrix*100, label=f'RT Version (OG)', color=custom_palette_temperature[temperature_list.index(temperature)])
+                plt.scatter(x=dB_list, y=percentage_correct_Hamacher_RTmax_matrix*100, label=f'RT_max version', color=custom_palette_temperature[temperature_list.index(temperature)], marker='x')
                 try:
                     plt.plot(sorted_x, y_sig_Hamacher, color=custom_palette_temperature[temperature_list.index(temperature)])
+                    plt.plot(sorted_x, y_sig_Hamacher_RTmax, color=custom_palette_temperature[temperature_list.index(temperature)], linestyle='--')
                 except:
                     print('No fit')
                 plt.title(f'Original Hamacher')
@@ -217,13 +224,14 @@ if __name__ == "__main__":
                     plt.xlim((min(dB_list)-1, max(dB_list)+1))  
 
                 plt.figure('Hamacher collected')
-                plt.plot(sorted_x, y_sig_Hamacher, label=f'sigma: {scaling_factor_sigma}', color=custom_palette_scaling[scaling_factor_sigma_list.index(scaling_factor_sigma)])
+                plt.plot(sorted_x, y_sig_Hamacher, label=f'RT sigma: {scaling_factor_sigma}', color=custom_palette_scaling[scaling_factor_sigma_list.index(scaling_factor_sigma)])
+                plt.plot(sorted_x, y_sig_Hamacher_RTmax, label=f'RTmax sigma: {scaling_factor_sigma}', color=custom_palette_scaling[temperature_list.index(temperature)], linestyle='--')
                 plt.title('Hamacher collected')
                 plt.xlabel('dB re Masker')
                 plt.ylabel('Percentage correct [%]')
                 plt.legend()
             
-            collected.savefig(save_dir_figure + '/3AFC_collected_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature_list) + '.png')
+            collected.savefig(save_dir_figure + '/3AFC_collected_sigmaSF_' + str(scaling_factor_sigma)+ '_temp_' + str(temperature_list) +  '_norm_' + str(norm_bool) + '.png')
 
 
     plt.show()

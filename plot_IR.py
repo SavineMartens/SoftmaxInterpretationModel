@@ -8,14 +8,14 @@ import re
 import matplotlib as mpl
 
 # To do
-# [ ] NH with 1903 fibers and TP2 cut-off at 500 Hz --> running on cluster rn
+# [X] NH with 1903 fibers and TP2 cut-off at 500 Hz --> running on cluster rn
 # [X] EH with 1903 fibers and TP2 cut-off at 500 Hz
 # [X] Check height of IRs for NH and EH 
 
 
 if __name__ == "__main__":
     test = 'MP'  # 'AM' or 'MP'
-    hearing = 'EH'  # 'NH' or 'EH'
+    hearing = 'NH'  # 'NH' or 'EH'
     folder_IR = f'./{test}/{hearing}/IR/'
     num_fibers = 1903# 952
     TP2_cut_off_Hz = 500
@@ -24,16 +24,20 @@ if __name__ == "__main__":
     if test == 'AM':
         if hearing == 'NH':
             wildcard_dB_start = '91_'
+            wildcard_R = '*unmodulated*reference91*'
             wildcard_dB_end = 'dB_IR'
         if hearing == 'EH':
             wildcard_dB_start = 'reference1_'
             wildcard_dB_end = 'dB_relscale'
+            wildcard_R = '*unmodulated*reference1*'
     if test == 'MP':
         if hearing == 'NH':
             wildcard_dB_start = 'probe_'
+            wildcard_R = '*masker_reference91_65_*'
             wildcard_dB_end = 'dB_IR'
         if hearing == 'EH':
             wildcard_dB_start = 'probe_'
+            wildcard_R = '*masker_reference1_rel*'
             wildcard_dB_end = 'dB_relscale'
 
 wildcard = f'*{num_fibers}CFs*{TP2_cut_off_Hz}Hz.npy'
@@ -81,6 +85,33 @@ plt.legend(ncol=2)
 plt.xlim((0, time_vector[-1]))
 plt.xlabel('Time (s)', fontsize=14)
 plt.ylabel('Internal Representation', fontsize=14)
+
+try:
+    sorted_files.remove(glob.glob(folder_IR + wildcard_R)[0])
+except:
+    print('Reference signal not found in files')
+rows, columns = closestDivisors(len(sorted_files))
+
+IR_R = np.load(glob.glob(folder_IR + wildcard_R)[0])
+
+fig, axes = plt.subplots(rows, columns, figsize=(15, 10))
+axes= axes.flatten()
+for f, file in enumerate(sorted_files):
+    print(f'Loading IR {f+1}: {file}')
+    IR = np.load(file)
+    try:
+        label_str = str(float(file.split(wildcard_dB_start)[1].split(wildcard_dB_end)[0])) + ' dB'
+    except:
+        label_str = 'Cannot read dB value'
+
+    axes[f].plot(time_vector, IR[max_band, :], label=label_str, linewidth=2, color='blue' )
+    axes[f].plot(time_vector, IR_R[max_band, :], label='Reference signal', color='r', linestyle='--', linewidth=2)
+    axes[f].set_title(label_str)
+    axes[f].set_xlim((0, time_vector[-1]))
+    axes[f].set_xlabel('Time (s)', fontsize=12)
+    axes[f].set_ylabel('Internal Representation', fontsize=12)
+    axes[f].legend()
+
 
 plt.show()
         
