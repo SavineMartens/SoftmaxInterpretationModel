@@ -18,3 +18,4 @@ AM/EH/RawData/
 run_NH_MP
 run*
 *.png
+*.ipynb

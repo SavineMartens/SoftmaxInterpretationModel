@@ -4,6 +4,8 @@ import glob
 import os
 import argparse
 
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Load and plot results for psychometric curve")
     parser.add_argument("-hearing", type=str, default="NH", help="Hearing type (NH or EH)")
@@ -13,7 +15,7 @@ if __name__ == "__main__":
     hearing = args.hearing
     test = args.test
 
-    folder_results = f'./output/{test}/{hearing}/results/'
+    folder_results = f'S:/python/SoftmaxInterpretationModel/output/{test}/{hearing}/results/' #f'./output/{test}/{hearing}/results/'
 
     all_files = sorted(glob.glob(os.path.join(folder_results, '*.npy')))
 
@@ -33,7 +35,10 @@ if __name__ == "__main__":
 
     # create colormap
     cmap = plt.get_cmap('viridis', len(sigma_values))
-    colors = [cmap(i) for i in range(cmap.N)]
+    colors_sigma = [cmap(i) for i in range(cmap.N)]
+
+    cmap = plt.get_cmap('plasma', len(temp_values))
+    colors_temp = [cmap(i) for i in range(cmap.N)]
 
     Hamacher_sigma_list = []
 
@@ -48,21 +53,39 @@ if __name__ == "__main__":
             # figure Hamacher RTmax 
             plt.figure(f'Hamacher RTmax and RT - {hearing} - {test}', figsize=(10, 6))
             plt.subplot(1,2,1)
-            plt.scatter(data['dB_list'], data['y_Hamacher_RTmax'], label=f'σ={sigma}', color=colors[np.where(sigma_values == sigma)[0][0]])
-            # plt.plot(data['dB_list'], data['y_fit_Hamacher_RTmax'], color=colors[np.where(sigma_values == sigma)[0][0]])
+            plt.scatter(data['dB_list'], data['y_Hamacher_RTmax'], label=f'σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+            plt.plot(data['dB_list'], data['y_fit_Hamacher_RTmax'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
             plt.xlabel('dB re Masker')
             plt.ylabel('Percentage correct [%]')
             plt.title('Hamacher: RTmax')
             plt.ylim((30, 101))
             plt.legend()
             plt.subplot(1,2,2)
-            plt.scatter(data['dB_list'], data['y_Hamacher_RT'], label=f'σ={sigma}', color=colors[np.where(sigma_values == sigma)[0][0]])
-            # plt.plot(data['dB_list'], data['y_fit_Hamacher_RT'], color=colors[np.where(sigma_values == sigma)[0][0]])
+            plt.scatter(data['dB_list'], data['y_Hamacher_RT'], label=f'σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+            plt.plot(data['dB_list'], data['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
             plt.xlabel('dB re Masker')
             plt.title('Hamacher: RT')
             plt.ylim((30, 101))
             plt.legend()
 
+        # figure: Softmax RTmax and RT, fixed sigma, varying temp
+        plt.figure(f'Softmax RTmax and RT - {hearing} - {test}, sigma={sigma}', figsize=(10, 6))
+        plt.subplot(1,2,1)
+        plt.scatter(data['dB_list'], data['y_soft_RTmax'], label=f'T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
+        plt.plot(data['dB_list'], data['y_fit_soft_RTmax'], color=colors_temp[np.where(temp_values == temp)[0][0]])
+        plt.xlabel('dB re Masker')  
+        plt.ylabel('Percentage correct [%]')
+        plt.title(f'Softmax: RTmax, σ={sigma}')
+        plt.ylim((30, 101))
+        plt.legend()
+        plt.subplot(1,2,2)
+        plt.scatter(data['dB_list'], data['y_soft_RT'], label=f'T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
+        plt.plot(data['dB_list'], data['y_fit_soft_RT'], color=colors_temp[np.where(temp_values == temp)[0][0]])
+        plt.xlabel('dB re Masker')
+        plt.ylabel('Percentage correct [%]')
+        plt.title(f'Softmax: RT, σ={sigma}')
+        plt.ylim((30, 101))
+        plt.legend()    
 
         # # figure comparing Hamacher_RT and Hamacher_RTmax
         # plt.figure(f'Hamacher Comparison - {hearing} - {test}', figsize=(10, 6))

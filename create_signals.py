@@ -127,10 +127,10 @@ def create_AM_tone(carrier_frequency=carrier_frequency, modulation_frequency=mod
         # plt.ylim((-1*max_val, max_val))
         plt.legend()
 
-for dB in range(21):
-    modulation_dB = -3*dB
-    print(modulation_dB)
-    create_AM_tone(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=False)
+# for dB in range(21):
+#     modulation_dB = -3*dB
+#     print(modulation_dB)
+#     create_AM_tone(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=False)
 
 
 
@@ -290,7 +290,7 @@ def create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB, probe_
         print('length masker_probe', len(masker_probe.get_array_of_samples()))
 
     if plot:
-        plt.figure()
+        plt.figure('Collected')
         plt.subplot(2,1,1)
         plt.plot(np.linspace(0,len(masker_probe.get_array_of_samples())/44100, len(masker_probe.get_array_of_samples())), masker_probe.get_array_of_samples())
         plt.title('Masker ( '+ str(masker_dB) +' dB) +  probe (' + str(probe_dB) + 'dB)')
@@ -306,10 +306,10 @@ def create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB, probe_
     masker_probe.export(audio_out_file, format="wav")
     masker.export(audio_out_file_masker, format="wav")
 
-# for dB in range(21):
-#     probe_dB = masker_dB - 3*dB
-#     print(-3*dB, 'dB:', probe_dB, 'dB')
-#     create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB=masker_dB, probe_dB=probe_dB, frequency=frequency, plot=True)
+for dB in range(21):
+    probe_dB = masker_dB - 3*dB
+    print(-3*dB, 'dB:', probe_dB, 'dB')
+    create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB=masker_dB, probe_dB=probe_dB, frequency=frequency, plot=True)
 
 
 def create_varying_probe_amplitude_stimuli(probe_amplitude_dB_reduction, frequency, plot=False):
