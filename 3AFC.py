@@ -35,6 +35,8 @@ if __name__ == "__main__":
 
     if args.norm:
         norm_bool = True
+    else:
+        norm_bool = False
 
     if test == 'AM':
         if hearing == 'NH':
