@@ -10,12 +10,13 @@ from utilities import *
 import platform
 
 # To do
-# [ ] check if RT max in memory causes not to reach 100% accuracy --> caused by temperature
+# [X] check if RT max in memory causes not to reach 100% accuracy --> caused by temperature
 # [X] plot IR!!!
 # [X] also create OG Hamacher
 # [ ] implement Gumbel distributed noise 
 # [ ] check if this is similar to e-softmax in this paper: https://pmc.ncbi.nlm.nih.gov/articles/PMC5001502/pdf/nihms780191.pdf
-# [ ] check why it softmax won't go below 67%
+# [X] check why it softmax won't go below 67%
+# [ ] check if using selected number of bands does allow to reach 100%
 
 if platform.system() == 'Linux':
     plt.switch_backend('agg')
