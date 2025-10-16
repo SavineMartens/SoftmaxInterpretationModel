@@ -25,7 +25,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-test', type=str, default='MP', help='AM or MP')
     parser.add_argument('-hearing', type=str, default='NH', help='NH or EH')
-    parser.add_argument('-norm', type=lambda x: x.lower() == "true")
+    parser.add_argument('-norm', default=False, action='store_true')
     args = parser.parse_args()
     test = args.test
     hearing = args.hearing
@@ -33,6 +33,7 @@ if __name__ == "__main__":
     TP2_cut_off_Hz = 500
     num_fibers = 1903# 952
 
+    print(args.norm)
     if args.norm:
         norm_bool = True
     else:
