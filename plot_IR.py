@@ -15,10 +15,10 @@ import matplotlib as mpl
 
 if __name__ == "__main__":
     test = 'AM'  # 'AM' or 'MP'
-    hearing = 'NH'  # 'NH' or 'EH'
+    hearing = 'EH'  # 'NH' or 'EH'
     folder_IR = f'./{test}/{hearing}/IR/'
     num_fibers = 1903# 952
-    TP2_cut_off_Hz = 500
+    TP2_cut_off_Hz = 1000
     Fs_down = 5000 # Downsampled frequency of neurograms and IRs
 
     if test == 'AM':
