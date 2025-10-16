@@ -201,13 +201,13 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create data for normal or electric hearing.")
-    parser.add_argument("--hearing", type=str, choices=["NH", "EH"], default="NH", help="Type of hearing to simulate")
-    parser.add_argument("--test", type=str, choices=["AM", "MP"], default="MP", help="Test type")
+    parser.add_argument("--hearing", type=str, choices=["NH", "EH"], default="EH", help="Type of hearing to simulate")
+    parser.add_argument("--test", type=str, choices=["AM", "MP"], default="AM", help="Test type")
     parser.add_argument("--create-files", type=lambda x: x.lower() == "true", default=True, help="Whether to generate data")
     parser.add_argument("--plot-files", type=lambda x: x.lower() == "true", default=True, help="Whether to plot IRs/neurograms")
     args = parser.parse_args()
 
-    TP2_cut_off_Hz = 500  # Hz
+    TP2_cut_off_Hz = 1000  # Hz
 
     print(f"\n Running {args.test} for {args.hearing} (create_files={args.create_files}, plot_files={args.plot_files})\n")
 
