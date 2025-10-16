@@ -95,7 +95,17 @@ def select_critical_bands(spike_rate_matrix, fiber_frequencies, type='single', n
             new_matrix[i-start_critical_band,:] = np.sum(spike_rate_matrix[low_idx:high_idx,:], axis=0)
             # print(i, ':', high_idx-low_idx, 'fibers')
         selected_spikes = new_matrix
-    x=3
+    # find out if any critical band is empty
+    if np.any(np.sum(selected_spikes, axis=1) == 0):
+        print('Warning: some critical bands are empty, removing them')
+        # if any critical band is empty, remove from matrix and from centre_remaining_frequency_bands
+        empty_bands = []
+        for i in range(selected_spikes.shape[0]):
+            if np.sum(selected_spikes[i,:]) == 0:
+                empty_bands.append(i)
+        selected_spikes = np.delete(selected_spikes, empty_bands, axis=0)
+        centre_remaining_frequency_bands = np.delete(centre_remaining_frequency_bands, empty_bands)
+    
     return selected_spikes, new_fiber_frequencies_CF, centre_remaining_frequency_bands, remaining_frequency_edges
 
 
@@ -322,6 +332,24 @@ def get_Hamacher_NIR(IR, sigma):
     return  NIR 
 
 def Softmax_memory_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False):
+    # if some bands are empty, remove them from all matrices
+    if np.any(np.sum(IR_R, axis=1) == 0):
+        print('Warning: some critical bands are empty, removing them')
+        # if any critical band is empty, remove from matrix and from centre_remaining_frequency_bands
+        empty_bands_R = []
+        empty_bands_RT = []
+        for i in range(IR_R.shape[0]):
+            if np.sum(IR_R[i,:]) == 0:
+                empty_bands_R.append(i)
+                empty_bands_RT.append(i)
+        if empty_bands_R != empty_bands_RT:
+            raise ValueError('Empty bands in IR_R and IR_RT are not the same, check the input matrices')
+        else:
+            empty_bands = empty_bands_R
+        IR_R = np.delete(IR_R, empty_bands, axis=0)
+        IR_RT = np.delete(IR_RT, empty_bands, axis=0)
+        S = np.delete(S, empty_bands, axis=0)
+    
     num_remaining_crit_bands, _ = IR_R.shape
     probabilities = np.zeros((n_iter, 3))
 

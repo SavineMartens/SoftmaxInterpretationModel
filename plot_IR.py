@@ -14,11 +14,11 @@ import matplotlib as mpl
 
 
 if __name__ == "__main__":
-    test = 'AM'  # 'AM' or 'MP'
-    hearing = 'EH'  # 'NH' or 'EH'
+    test = 'MP'  # 'AM' or 'MP'
+    hearing = 'NH'  # 'NH' or 'EH'
     folder_IR = f'./{test}/{hearing}/IR/'
     num_fibers = 1903# 952
-    TP2_cut_off_Hz = 1000
+    TP2_cut_off_Hz = 500
     Fs_down = 5000 # Downsampled frequency of neurograms and IRs
 
     if test == 'AM':
@@ -94,7 +94,7 @@ rows, columns = closestDivisors(len(sorted_files))
 
 IR_R = np.load(glob.glob(folder_IR + wildcard_R)[0])
 
-fig, axes = plt.subplots(rows, columns, figsize=(15, 10))
+fig, axes = plt.subplots(rows, columns, figsize=(15, 10), sharex=True, sharey=True)
 axes= axes.flatten()
 for f, file in enumerate(sorted_files):
     print(f'Loading IR {f+1}: {file}')
