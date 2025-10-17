@@ -112,7 +112,7 @@ def process_electric_hearing(test, create_files=False, plot_files=True, TP2_cut_
         plt.show()
 
 
-def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_off_Hz=500):
+def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_off_Hz=500, dB_str=None):
     """Process data for normal hearing (NH) using Bruce–Zilany model."""
     if stimulus is None:
         raise ImportError("Bruce–Zilany model not installed or imported correctly.")
@@ -126,6 +126,11 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
     num_fibers = len(frequencies)
     Fs = 1e4
 
+    if dB_str is not None:
+        dB_str = f'{dB_str}*' 
+    else:
+        dB_str = ''
+
     if fixed_seed:
         seed = 42
         import brucezilany
@@ -134,7 +139,7 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
         save_dir_neuro += f'seed{seed}/'
         save_dir_IR += f'seed{seed}/'
 
-    sound_files = sorted(glob.glob(f'./sounds/{test}/*reference91_*20*.wav'))
+    sound_files = sorted(glob.glob(f'./sounds/{test}/*reference91_*{dB_str}.wav'))
     print(f'Found {len(sound_files)} sound files for NH.')
 
 
@@ -215,6 +220,7 @@ if __name__ == "__main__":
     parser.add_argument("--test", type=str, choices=["AM", "MP"], default="MP", help="Test type")
     parser.add_argument("--create-files", type=lambda x: x.lower() == "true", default=True, help="Whether to generate data")
     parser.add_argument("--plot-files", type=lambda x: x.lower() == "true", default=False, help="Whether to plot IRs/neurograms")
+    parser.add_argument("--dB", type=str, default=None, help="dB string to filter sound files (only for NH)")
     args = parser.parse_args()
 
     TP2_cut_off_Hz = 500  # Hz
@@ -224,4 +230,4 @@ if __name__ == "__main__":
     if args.hearing == "EH":
         process_electric_hearing(args.test, args.create_files, args.plot_files, TP2_cut_off_Hz)
     else:
-        process_normal_hearing(args.test, args.create_files, args.plot_files, TP2_cut_off_Hz)
+        process_normal_hearing(args.test, args.create_files, args.plot_files, TP2_cut_off_Hz, dB_str=args.dB)
