@@ -69,14 +69,20 @@ if __name__ == "__main__":
         fig_Hamacher_RTmax, axes = plt.subplots(1, 2, figsize=(10, 10))
         axes = axes.flatten()
         axes[0].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RTmax'], label=f'EH, σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-        axes[0].plot(data_EH['dB_list'], data_EH['y_fit_Hamacher_RTmax'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+        try:
+            axes[0].plot(data_EH['dB_list'], data_EH['y_fit_Hamacher_RTmax'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+        except ValueError:
+            pass
         axes[0].set_xlabel('dB re Masker')
         axes[0].set_ylabel('Percentage correct [%]')
         axes[0].set_title('Hamacher: RT_{max} EH')
         axes[0].set_ylim((30, 101))
         axes[0].legend()
         axes[1].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'NH, σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-        axes[1].plot(data_NH['dB_list'], data_NH['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+        try:
+            axes[1].plot(data_NH['dB_list'], data_NH['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+        except ValueError:
+            pass
         axes[1].set_xlabel('dB re Masker')
         axes[1].set_ylabel('Percentage correct [%]')
         axes[1].set_title('Hamacher: RT NH')
@@ -89,14 +95,20 @@ if __name__ == "__main__":
         fig_Hamacher_RT, axes = plt.subplots(1, 2, figsize=(10, 10))
         axes = axes.flatten()
         axes[0].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RT'], label=f'EH, σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-        axes[0].plot(data_EH['dB_list'], data_EH['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+        try:
+            axes[0].plot(data_EH['dB_list'], data_EH['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+        except ValueError:
+            pass
         axes[0].set_xlabel('dB re Masker')
         axes[0].set_ylabel('Percentage correct [%]')
         axes[0].set_title('Hamacher: RT EH')
         axes[0].set_ylim((30, 101))
         axes[0].legend()
         axes[1].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'NH, σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-        axes[1].plot(data_NH['dB_list'], data_NH['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+        try:
+            axes[1].plot(data_NH['dB_list'], data_NH['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+        except ValueError:
+            pass
         axes[1].set_xlabel('dB re Masker')
         axes[1].set_ylabel('Percentage correct [%]')
         axes[1].set_title('Hamacher: RT NH')
@@ -106,9 +118,9 @@ if __name__ == "__main__":
         plt.tight_layout()
 
         # figure: Softmax RTmax, fixed sigma, varying temp
-        fig_Softmax_RTmax, axes = plt.subplots(1, 2, figsize=(10, 10), figname=f'Softmax RTmax - {test}, sigma={sigma}')
-        axes = axes.flatten()
-        
+        # fig_Softmax_RTmax, axes = plt.subplots(1, 2, figsize=(10, 10), figname=f'Softmax RTmax - {test}, sigma={sigma}')
+        # axes = axes.flatten()
+
 
 
 plt.show()
