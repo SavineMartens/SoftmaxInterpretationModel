@@ -117,6 +117,7 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
     if stimulus is None:
         raise ImportError("Bruce–Zilany model not installed or imported correctly.")
 
+    fixed_seed = True
     save_dir_neuro = f'./{test}/NH/neurograms/'
     save_dir_IR = f'./{test}/NH/IR/'
     ensure_dirs(save_dir_neuro, save_dir_IR)
@@ -125,8 +126,17 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
     num_fibers = len(frequencies)
     Fs = 1e4
 
+    if fixed_seed:
+        seed = 42
+        import brucezilany
+        brucezilany.set_seed(seed)
+        np.random.seed(seed)
+        save_dir_neuro += f'seed{seed}/'
+        save_dir_IR += f'seed{seed}/'
+
     sound_files = sorted(glob.glob(f'./sounds/{test}/*reference91_*.wav'))
     print(f'Found {len(sound_files)} sound files for NH.')
+
 
     for i, file_path in enumerate(sound_files):
         sound_name = os.path.basename(file_path).replace('.wav', '')
