@@ -17,6 +17,7 @@ import platform
 # [ ] check if this is similar to e-softmax in this paper: https://pmc.ncbi.nlm.nih.gov/articles/PMC5001502/pdf/nihms780191.pdf
 # [X] check why it softmax won't go below 67%
 # [ ] check if using selected number of bands does allow to reach 100%
+# [ ] check why NH with MP has differences in loudness wrt R 
 
 if platform.system() == 'Linux':
     plt.switch_backend('agg')
