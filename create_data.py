@@ -134,7 +134,7 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
         save_dir_neuro += f'seed{seed}/'
         save_dir_IR += f'seed{seed}/'
 
-    sound_files = sorted(glob.glob(f'./sounds/{test}/*reference91_*.wav'))
+    sound_files = sorted(glob.glob(f'./sounds/{test}/*reference91_*14*.wav'))
     print(f'Found {len(sound_files)} sound files for NH.')
 
 
