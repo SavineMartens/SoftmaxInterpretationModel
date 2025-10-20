@@ -85,19 +85,33 @@ def process_electric_hearing(test, create_files=False, plot_files=True, TP2_cut_
 
         for f, file in enumerate(files):
             print(f'[{f+1}/{len(files)}] Processing {file}')
-            neurogram, IR = get_Hamacher_IR_from_numpy(
-                file, fiber_IDs=fiber_ids, frequencies=freqs, plot_IR=False, band_type='adapted'
-            )
-
             neurogram_path = os.path.join(save_dir_neuro,
                                           os.path.basename(file).replace('spike_trains_F120', 'neurogram')
                                           + f'_{num_fibers}CFs.npy')
             IR_path = os.path.join(save_dir_IR,
                                    os.path.basename(file).replace('spike_trains_F120', 'neurogram')
                                    + f'_{num_fibers}CFs_{IR.shape[0]}bands_TP2_{TP2_cut_off_Hz}Hz.npy')
+            
+            # if files already exist, skip
+            if os.path.exists(neurogram_path) and os.path.exists(IR_path):
+                print(f"🧠 Neurogram and IR already exist, skipping: {os.path.basename(neurogram_path)}")
+                continue
+            else:
+                print("🧠 Generating new neurogram and IR...")
 
-            save_numpy(neurogram, neurogram_path)
-            save_numpy(IR, IR_path)
+                neurogram, IR = get_Hamacher_IR_from_numpy(
+                    file, fiber_IDs=fiber_ids, frequencies=freqs, plot_IR=False, band_type='adapted'
+                )
+
+                # neurogram_path = os.path.join(save_dir_neuro,
+                #                             os.path.basename(file).replace('spike_trains_F120', 'neurogram')
+                #                             + f'_{num_fibers}CFs.npy')
+                # IR_path = os.path.join(save_dir_IR,
+                #                     os.path.basename(file).replace('spike_trains_F120', 'neurogram')
+                #                     + f'_{num_fibers}CFs_{IR.shape[0]}bands_TP2_{TP2_cut_off_Hz}Hz.npy')
+
+                save_numpy(neurogram, neurogram_path)
+                save_numpy(IR, IR_path)
 
     # --- Step 2: Plot created files ---
     if plot_files:

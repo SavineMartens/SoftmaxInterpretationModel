@@ -331,24 +331,25 @@ def get_Hamacher_NIR(IR, sigma):
     x=3
     return  NIR 
 
-def Softmax_memory_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False):
+
+
+def remove_empty_bands(IR):
     # if some bands are empty, remove them from all matrices
-    if np.any(np.sum(IR_R, axis=1) == 0):
+    if np.any(np.sum(IR, axis=1) == 0):
         print('Warning: some critical bands are empty, removing them')
         # if any critical band is empty, remove from matrix and from centre_remaining_frequency_bands
-        empty_bands_R = []
-        empty_bands_RT = []
-        for i in range(IR_R.shape[0]):
-            if np.sum(IR_R[i,:]) == 0:
-                empty_bands_R.append(i)
-                empty_bands_RT.append(i)
-        if empty_bands_R != empty_bands_RT:
-            raise ValueError('Empty bands in IR_R and IR_RT are not the same, check the input matrices')
-        else:
-            empty_bands = empty_bands_R
-        IR_R = np.delete(IR_R, empty_bands, axis=0)
-        IR_RT = np.delete(IR_RT, empty_bands, axis=0)
-        S = np.delete(S, empty_bands, axis=0)
+        empty_bands = []
+        for i in range(IR.shape[0]):
+            if np.sum(IR[i,:]) == 0:
+                empty_bands.append(i)
+        IR = np.delete(IR, empty_bands, axis=0)
+    return IR
+
+
+
+
+def Softmax_memory_3AFC(IR_RT, IR_R, S, sigma_w, temperature, measure='pearson', n_iter=100, use_De=False, norm_bool=False):
+
     
     num_remaining_crit_bands, _ = IR_R.shape
     probabilities = np.zeros((n_iter, 3))

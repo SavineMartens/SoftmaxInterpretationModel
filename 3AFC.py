@@ -83,6 +83,10 @@ if __name__ == "__main__":
     IR_R = np.load(R_name)
     IR_RT_max = np.load(RT_max_name)
     
+    # remove empty bands
+    IR_IR = remove_empty_bands(IR_R)
+    IR_RT_max = remove_empty_bands(IR_RT_max)
+
     # S memory in softmax
     S = IR_RT_max - IR_R
     files = glob.glob(dir_to_loop + f'*{num_fibers}CFs*{TP2_cut_off_Hz}Hz.npy')
@@ -91,8 +95,12 @@ if __name__ == "__main__":
         scaling_factor_sigma_list = [0.2, 2.2]
         temperature_list = [0.0002, 2.2] 
     else:
-        scaling_factor_sigma_list = [0.02, 0.04, 0.06, 0.08, 0.2, 0.4, 0.6, 0.8]# [0.0001, 0.0010, 0.0030, 0.0090, 0.0270, 0.0810, 0.2430, 0.7290, 2.1870, 6.5610, 19.6830]#np.arange(0.2, 2.2, 0.2)
-        temperature_list =  [0.0010, 0.0030, 0.0090, 0.0270, 0.0810, 0.2430, 0.7290, 2.1870, 6.5610, 19.6830] #[0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
+        if test == 'AM':
+            scaling_factor_sigma_list = [0.02, 0.04, 0.06, 0.08, 0.2, 0.4, 0.6, 0.8]
+            temperature_list =  [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
+        if test == 'MP':
+            scaling_factor_sigma_list = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
+            temperature_list =  [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
 
     # create color map
     color_map_temperature = plt.get_cmap('viridis', len(temperature_list))
@@ -123,6 +131,7 @@ if __name__ == "__main__":
         for f, file in enumerate(files):
             print(f'Processing file {f+1}/{len(files)}: {file}')
             IR_RT = np.load(file)
+            IR_RT = remove_empty_bands(IR_RT)
             try:
                 dB = int(file[file.index(wildcard_dB_start) + len(wildcard_dB_start): file.index(wildcard_dB_end)]) + dB_correction
             except: # when R 
