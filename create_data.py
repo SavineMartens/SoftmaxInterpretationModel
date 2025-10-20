@@ -117,7 +117,7 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
     if stimulus is None:
         raise ImportError("Bruce–Zilany model not installed or imported correctly.")
 
-    fixed_seed = False
+    fixed_seed = True
     save_dir_neuro = f'./{test}/NH/neurograms/'
     save_dir_IR = f'./{test}/NH/IR/'
     ensure_dirs(save_dir_neuro, save_dir_IR)
