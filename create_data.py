@@ -90,7 +90,7 @@ def process_electric_hearing(test, create_files=False, plot_files=True, TP2_cut_
                                           + f'_{num_fibers}CFs.npy')
             IR_path = os.path.join(save_dir_IR,
                                    os.path.basename(file).replace('spike_trains_F120', 'neurogram')
-                                   + f'_{num_fibers}CFs_{IR.shape[0]}bands_TP2_{TP2_cut_off_Hz}Hz.npy')
+                                   + f'_{num_fibers}CFs_24bands_TP2_{TP2_cut_off_Hz}Hz.npy')
             
             # if files already exist, skip
             if os.path.exists(neurogram_path) and os.path.exists(IR_path):
