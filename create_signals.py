@@ -301,12 +301,12 @@ def create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB, probe_
         print(len(masker.get_array_of_samples()))
 
     # Either save modified audio
-    audio_out_file_masker = './sounds/MP/masker_reference91dB_' + str(masker_dB) +'.wav'
-    audio_out_file = './sounds/MP/masker_reference91dB_' + str(masker_dB) + 'dB_probe_'+ str(probe_dB) +'dB.wav'
+    audio_out_file_masker = './sounds/MP/masker_reference91_' + str(masker_dB) +'.wav'
+    audio_out_file = './sounds/MP/masker_reference91_' + str(masker_dB) + 'dB_probe_'+ str(probe_dB) +'dB.wav'
     masker_probe.export(audio_out_file, format="wav")
     masker.export(audio_out_file_masker, format="wav")
 
-for dB in range(21):
+for dB in range(21, 25, 1):
     probe_dB = masker_dB - 3*dB
     print(-3*dB, 'dB:', probe_dB, 'dB')
     create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB=masker_dB, probe_dB=probe_dB, frequency=frequency, plot=True)
@@ -360,7 +360,7 @@ def create_varying_probe_amplitude_stimuli(probe_amplitude_dB_reduction, frequen
     masker_probe.export(audio_out_file, format="wav")
     masker.export(audio_out_file_masker, format="wav")
 
-# for dB in range(21):
+# for dB in range(21, 25, 1):
 #     probe_dB = - 3*dB
 #     print('probe reduction:', -3*dB, 'dB' )
 #     create_varying_probe_amplitude_stimuli(probe_amplitude_dB_reduction=probe_dB, frequency=frequency, plot=True)

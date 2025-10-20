@@ -18,6 +18,9 @@ import platform
 # [X] check why it softmax won't go below 67%
 # [ ] check if using selected number of bands does allow to reach 100%
 # [ ] check why NH with MP has differences in loudness wrt R 
+# [ ] Try MP with other folder
+# [X] figure as in paper with NH and EH side by side
+# [ ] include R in 3AFC
 
 if platform.system() == 'Linux':
     plt.switch_backend('agg')
@@ -83,10 +86,10 @@ if __name__ == "__main__":
     # S memory in softmax
     S = IR_RT_max - IR_R
     files = glob.glob(dir_to_loop + f'*{num_fibers}CFs*{TP2_cut_off_Hz}Hz.npy')
-    files.remove(R_name)    
+    # files.remove(R_name)    
     if platform.system() == 'Windows':
         scaling_factor_sigma_list = [0.2, 2.2]
-        temperature_list = [0.0002, 2.2] #[0.00002, 0.0002]
+        temperature_list = [0.0002, 2.2] 
     else:
         scaling_factor_sigma_list = [0.02, 0.04, 0.06, 0.08, 0.2, 0.4, 0.6, 0.8]# [0.0001, 0.0010, 0.0030, 0.0090, 0.0270, 0.0810, 0.2430, 0.7290, 2.1870, 6.5610, 19.6830]#np.arange(0.2, 2.2, 0.2)
         temperature_list =  [0.0010, 0.0030, 0.0090, 0.0270, 0.0810, 0.2430, 0.7290, 2.1870, 6.5610, 19.6830] #[0.00002, 0.0002, 0.002, 0.02, 0.2, 2]
@@ -120,7 +123,10 @@ if __name__ == "__main__":
         for f, file in enumerate(files):
             print(f'Processing file {f+1}/{len(files)}: {file}')
             IR_RT = np.load(file)
-            dB = int(file[file.index(wildcard_dB_start) + len(wildcard_dB_start): file.index(wildcard_dB_end)]) + dB_correction
+            try:
+                dB = int(file[file.index(wildcard_dB_start) + len(wildcard_dB_start): file.index(wildcard_dB_end)]) + dB_correction
+            except: # when R 
+                dB = -80
             dB_list.append(dB)
 
             # Hamacher

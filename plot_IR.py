@@ -16,7 +16,7 @@ import matplotlib as mpl
 if __name__ == "__main__":
     test = 'MP'  # 'AM' or 'MP'
     hearing = 'NH'  # 'NH' or 'EH'
-    folder_IR = f'./{test}/{hearing}/IR/'
+    folder_IR = f'S:/python/SoftmaxInterpretationModel/{test}/{hearing}/IR/' #f'./{test}/{hearing}/IR/'
     num_fibers = 1903# 952
     TP2_cut_off_Hz = 500
     Fs_down = 5000 # Downsampled frequency of neurograms and IRs
@@ -32,6 +32,7 @@ if __name__ == "__main__":
             wildcard_R = '*unmodulated*reference1*'
     if test == 'MP':
         if hearing == 'NH':
+            folder_IR += 'seed42/'
             wildcard_dB_start = 'probe_'
             wildcard_R = '*masker_reference91_65_*'
             wildcard_dB_end = 'dB_IR'

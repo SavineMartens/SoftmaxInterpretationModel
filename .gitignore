@@ -2,6 +2,7 @@
 softmax_venv/
 paper/
 logs/
+notebooks/
 
 # large folders
 AM/
