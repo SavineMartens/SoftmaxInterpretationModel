@@ -167,6 +167,9 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
         IR_pattern = f"*{sound_name}*_{num_fibers}CFs_*bands_TP2_{TP2_cut_off_Hz}Hz.npy"
         existing_IRs = glob.glob(os.path.join(save_dir_IR, IR_pattern))
 
+        existing_IRs = False
+        existing_neurograms = False
+
         if existing_neurograms:
             # if existing_IRs:
             #     print(f"🧠 IR already exists: {os.path.basename(existing_IRs[0])}, skipping.")
