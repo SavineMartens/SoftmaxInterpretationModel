@@ -17,10 +17,11 @@ import platform
 # [ ] check if this is similar to e-softmax in this paper: https://pmc.ncbi.nlm.nih.gov/articles/PMC5001502/pdf/nihms780191.pdf
 # [X] check why it softmax won't go below 67%
 # [ ] check if using selected number of bands does allow to reach 100%
-# [ ] check why NH with MP has differences in loudness wrt R 
-# [ ] Try MP with other folder
+# [X] check why NH with MP has differences in loudness wrt R 
+# [X] Try MP with other folder
 # [X] figure as in paper with NH and EH side by side
-# [ ] include R in 3AFC
+# [X] include R in 3AFC
+# [ ] create seed42 folder for AM as well
 
 if platform.system() == 'Linux':
     plt.switch_backend('agg')
@@ -44,6 +45,10 @@ if __name__ == "__main__":
     else:
         norm_bool = False
 
+    save_dir_figure = f'./output/{test}/{hearing}/figures/'
+    save_dir_results = f'./output/{test}/{hearing}/results/'
+
+
     if test == 'AM':
         if hearing == 'NH':
             wildcard_R = f'*unmodulated*reference91*'
@@ -57,6 +62,9 @@ if __name__ == "__main__":
             wildcard_dB_end = 'dB_relscale'
     if test == 'MP':
         if hearing == 'NH':
+            dir_to_loop += 'seed42/'
+            save_dir_figure += 'seed42/'
+            save_dir_results += 'seed42/'
             wildcard_R = f'*masker_reference91_65_*'
             wildcard_RT_max = f'*masker_reference91_65dB_probe_65dB*'
             wildcard_dB_start = 'probe_'
@@ -67,8 +75,7 @@ if __name__ == "__main__":
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_relscale'
     
-    save_dir_figure = f'./output/{test}/{hearing}/figures/'
-    save_dir_results = f'./output/{test}/{hearing}/results/'
+
 
     print(f'Running {test} for {hearing}')
 

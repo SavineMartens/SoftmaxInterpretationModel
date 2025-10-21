@@ -93,6 +93,9 @@ except:
     print('Reference signal not found in files')
 rows, columns = closestDivisors(len(sorted_files))
 
+
+dB_values = []
+
 IR_R = np.load(glob.glob(folder_IR + wildcard_R)[0])
 
 fig, axes = plt.subplots(rows, columns, figsize=(15, 10), sharex=True, sharey=True)
@@ -102,6 +105,7 @@ for f, file in enumerate(sorted_files):
     IR = np.load(file)
     try:
         label_str = str(float(file.split(wildcard_dB_start)[1].split(wildcard_dB_end)[0])) + ' dB'
+        dB_values.append(float(label_str.split(' dB')[0]))
     except:
         label_str = 'Cannot read dB value'
 
@@ -113,6 +117,12 @@ for f, file in enumerate(sorted_files):
     axes[f].set_ylabel('Internal Representation', fontsize=12)
     axes[f].legend()
 
+unique_dB_values = set(dB_values)
+# print which dB values are duplicated
+for db in unique_dB_values:
+    count = dB_values.count(db)
+    if count > 1:
+        print(f'dB value {db} is duplicated {count} times.')
 
 plt.show()
         

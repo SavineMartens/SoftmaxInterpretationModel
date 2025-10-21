@@ -4,7 +4,7 @@ import platform
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
-
+import brucezilany
 from utilities import *
 from Hamacher_utils import *
 
@@ -49,7 +49,7 @@ def load_stimulus(file_path, trim_reference=0.3):
     samples = int(trim_reference * fs)
     audio = audio[:samples]
     duration = len(audio) / fs
-    return stimulus.Stimulus(audio, fs, duration)
+    return brucezilany.stimulus.Stimulus(audio, fs, duration)
 
 
 def save_numpy(data, path):
@@ -145,13 +145,7 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
     else:
         dB_str = ''
 
-    if fixed_seed:
-        seed = 42
-        import brucezilany
-        brucezilany.set_seed(seed)
-        np.random.seed(seed)
-        save_dir_neuro += f'seed{seed}/'
-        save_dir_IR += f'seed{seed}/'
+
 
     sound_files = sorted(glob.glob(f'./sounds/{test}/*reference91_*{dB_str}.wav'))
     print(f'Found {len(sound_files)} sound files for NH.')
@@ -192,7 +186,13 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
         else:
             print("🧠 Generating new neurogram...")
             stim = load_stimulus(file_path, trim_reference=0.25)
-            ng = Neurogram(frequencies, n_low=10, n_med=10, n_high=30)
+            if fixed_seed:
+                seed = 42
+                brucezilany.set_seed(seed)
+                np.random.seed(seed)
+                save_dir_neuro += f'seed{seed}/'
+                save_dir_IR += f'seed{seed}/'
+            ng = brucezilany.Neurogram(frequencies, n_low=10, n_med=10, n_high=30)
             ng.bin_width = 1 / Fs
             ng.create(sound_wave=stim, species=Species.HUMAN_SHERA, n_trials=1)
 
