@@ -21,7 +21,7 @@ import platform
 # [X] Try MP with other folder
 # [X] figure as in paper with NH and EH side by side
 # [X] include R in 3AFC
-# [ ] create seed42 folder for AM as well
+# [X] create seed42 folder for AM as well
 
 if platform.system() == 'Linux':
     plt.switch_backend('agg')
@@ -29,21 +29,21 @@ if platform.system() == 'Linux':
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-test', type=str, default='MP', help='AM or MP')
+    parser.add_argument('-test', type=str, default='AM', help='AM or MP')
     parser.add_argument('-hearing', type=str, default='NH', help='NH or EH')
     parser.add_argument('-norm', default=False, action='store_true')
     args = parser.parse_args()
     test = args.test
     hearing = args.hearing
-    dir_to_loop = './' + test + '/' + hearing + '/IR/'
+    dir_to_loop = f'S:/python/SoftmaxInterpretationModel/{test}/{hearing}/IR/'
     TP2_cut_off_Hz = 500
     num_fibers = 1903# 952
 
-    print(args.norm)
     if args.norm:
         norm_bool = True
     else:
         norm_bool = False
+    print(f'Norm bool is set to {norm_bool}')
 
     save_dir_figure = f'./output/{test}/{hearing}/figures/'
     save_dir_results = f'./output/{test}/{hearing}/results/'
@@ -55,11 +55,16 @@ if __name__ == "__main__":
             wildcard_RT_max = f'*modulated*reference91*_0dB*'
             wildcard_dB_start = '91_'
             wildcard_dB_end = 'dB_IR'
+            num_bands = 24
+            dir_to_loop += 'seed42/'
+            save_dir_figure += 'seed42/'
+            save_dir_results += 'seed42/'
         if hearing == 'EH':
             wildcard_R = f'*unmodulated*reference1*'
             wildcard_RT_max = f'*modulated*reference1*_0dB*'
             wildcard_dB_start = 'reference1_'
             wildcard_dB_end = 'dB_relscale'
+            num_bands = 28
     if test == 'MP':
         if hearing == 'NH':
             dir_to_loop += 'seed42/'
@@ -69,11 +74,13 @@ if __name__ == "__main__":
             wildcard_RT_max = f'*masker_reference91_65dB_probe_65dB*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_IR'
+            num_bands = 24
         if hearing == 'EH':
             wildcard_R = f'*masker_reference1_rel*'
             wildcard_RT_max = f'*masker_reference1_*probe_0*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_relscale'
+            num_bands = 24
     
 
 
@@ -101,18 +108,18 @@ if __name__ == "__main__":
 
     # S memory in softmax
     S = IR_RT_max - IR_R
-    files = glob.glob(dir_to_loop + f'*{num_fibers}CFs*{TP2_cut_off_Hz}Hz.npy')
+    files = glob.glob(dir_to_loop + f'*{num_fibers}CFs_{num_bands}bands*{TP2_cut_off_Hz}Hz.npy')
     # files.remove(R_name)    
-    if platform.system() == 'Windows':
-        scaling_factor_sigma_list = [0.2, 2.2]
-        temperature_list = [0.0002, 2.2] 
-    else:
-        if test == 'AM':
-            scaling_factor_sigma_list = [0.02, 0.04, 0.06, 0.08, 0.2, 0.4, 0.6, 0.8]
-            temperature_list =  [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
-        if test == 'MP':
-            scaling_factor_sigma_list = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
-            temperature_list =  [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
+    # if platform.system() == 'Windows':
+    #     scaling_factor_sigma_list = [0.2, 2.2]
+    #     temperature_list = [0.0002, 2.2] 
+    # else:
+    if test == 'AM':
+        scaling_factor_sigma_list = [0.02, 0.04, 0.06, 0.08, 0.2, 0.4, 0.6, 0.8]
+        temperature_list =  [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
+    if test == 'MP':
+        scaling_factor_sigma_list = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
+        temperature_list =  [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
 
     # create color map
     color_map_temperature = plt.get_cmap('viridis', len(temperature_list))
@@ -263,7 +270,7 @@ if __name__ == "__main__":
 
                 plt.figure('Hamacher collected')
                 plt.plot(sorted_x, y_sig_Hamacher, label=f'RT sigma: {scaling_factor_sigma}', color=custom_palette_scaling[scaling_factor_sigma_list.index(scaling_factor_sigma)])
-                plt.plot(sorted_x, y_sig_Hamacher_RTmax, label=f'RTmax sigma: {scaling_factor_sigma}', color=custom_palette_scaling[temperature_list.index(temperature)], linestyle='--')
+                plt.plot(sorted_x, y_sig_Hamacher_RTmax, label=f'RTmax sigma: {scaling_factor_sigma}', color=custom_palette_temperature[temperature_list.index(temperature)], linestyle='--')
                 plt.title('Hamacher collected')
                 plt.xlabel('dB re Masker')
                 plt.ylabel('Percentage correct [%]')

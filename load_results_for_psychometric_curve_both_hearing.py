@@ -5,8 +5,8 @@ import os
 import argparse
 
 # To do
-# [ ] create neurograms with smaller probe amplitudes for MP
-# [ ] run 3AFC & AMP with values from doc
+# [X] create neurograms with smaller probe amplitudes for MP
+# [X] run 3AFC & AMP with values from doc
 # [ ] als run with True normalization
 # 
 
@@ -14,7 +14,7 @@ import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Load and plot results for psychometric curve")
     parser.add_argument("-test", type=str, default="MP", help="Test type (AM or FM)")
-    parser.add_argument('-norm', default=False, action='store_true')
+    parser.add_argument('-norm', default=True, action='store_true')
     args = parser.parse_args()
 
     test = args.test
@@ -24,7 +24,7 @@ if __name__ == "__main__":
         norm_bool = False
 
     try:
-        folder_results_NH = f'S:/python/SoftmaxInterpretationModel/output/{test}/NH/results/' 
+        folder_results_NH = f'S:/python/SoftmaxInterpretationModel/output/{test}/NH/results/seed42/' 
         folder_results_EH = f'S:/python/SoftmaxInterpretationModel/output/{test}/EH/results/'
     except:
         print('Connection to cluster not working')
@@ -79,8 +79,8 @@ if __name__ == "__main__":
     sigma_values = np.intersect1d(sigma_values_NH, sigma_values_EH)
     temp_values = np.intersect1d(temp_values_NH, temp_values_EH)
 
-    # desired_sigma_values = [s for s in desired_sigma_values if s in sigma_values]
-    # desired_temp_values = [t for t in desired_temp_values if t in temp_values]
+    desired_sigma_values = [s for s in desired_sigma_values if s in sigma_values]
+    desired_temp_values = [t for t in desired_temp_values if t in temp_values]
 
     # create colormap
     cmap = plt.get_cmap('viridis', len(sigma_values))
@@ -98,7 +98,7 @@ if __name__ == "__main__":
                 print(file)
                 data_EH = np.load(file, allow_pickle=True).item()
                 sigma = data_EH['sigma_SF']
-                axes[0,0].scatter(data_EH['dB_list'], data_EH['y_soft_RTmax'], label=f'EH, T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
+                axes[0,0].scatter(data_EH['dB_list'], data_EH['y_soft_RTmax'], label=f'T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
                 try:
                     axes[0,0].plot(data_EH['dB_list'], data_EH['y_fit_soft_RTmax'], color=colors_temp[np.where(temp_values == temp)[0][0]])
                 except ValueError:
@@ -113,7 +113,7 @@ if __name__ == "__main__":
                 print(file)
                 data_EH = np.load(file, allow_pickle=True).item()
                 sigma = data_EH['sigma_SF']
-                axes[0,1].scatter(data_EH['dB_list'], data_EH['y_soft_RTmax'], label=f'EH, sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                axes[0,1].scatter(data_EH['dB_list'], data_EH['y_soft_RTmax'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 try:
                     axes[0,1].plot(data_EH['dB_list'], data_EH['y_fit_soft_RTmax'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 except ValueError:
@@ -127,7 +127,7 @@ if __name__ == "__main__":
                 print(file)
                 data_NH = np.load(file, allow_pickle=True).item()
                 temp = data_NH['temperature']
-                axes[1,0].scatter(data_NH['dB_list'], data_NH['y_soft_RTmax'], label=f'NH, temp={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
+                axes[1,0].scatter(data_NH['dB_list'], data_NH['y_soft_RTmax'], label=f'temp={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
                 try:
                     axes[1,0].plot(data_NH['dB_list'], data_NH['y_fit_soft_RTmax'], color=colors_temp[np.where(temp_values == temp)[0][0]])
                 except ValueError:
@@ -141,7 +141,7 @@ if __name__ == "__main__":
                 print(file)
                 data_NH = np.load(file, allow_pickle=True).item()
                 temp = data_NH['temperature']
-                axes[1,1].scatter(data_NH['dB_list'], data_NH['y_soft_RTmax'], label=f'NH, σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                axes[1,1].scatter(data_NH['dB_list'], data_NH['y_soft_RTmax'], label=f'σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 try:
                     axes[1,1].plot(data_NH['dB_list'], data_NH['y_fit_soft_RTmax'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 except ValueError:
