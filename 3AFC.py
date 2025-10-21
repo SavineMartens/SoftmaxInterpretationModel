@@ -93,6 +93,11 @@ if __name__ == "__main__":
     # remove empty bands
     IR_IR = remove_empty_bands(IR_R)
     IR_RT_max = remove_empty_bands(IR_RT_max)
+    if IR_R.shape[0] != IR_RT_max.shape[0]:
+        print('Warning: Different number of bands in R and RT_max')
+        min_bands = min(IR_R.shape[0], IR_RT_max.shape[0])
+        IR_R = IR_R[:min_bands, :]
+        IR_RT_max = IR_RT_max[:min_bands, :]
 
     # S memory in softmax
     S = IR_RT_max - IR_R
@@ -139,6 +144,12 @@ if __name__ == "__main__":
             print(f'Processing file {f+1}/{len(files)}: {file}')
             IR_RT = np.load(file)
             IR_RT = remove_empty_bands(IR_RT)
+            if IR_R.shape[0] != IR_RT.shape[0]:
+                print('Warning: Different number of bands in R and RT_max')
+                min_bands = min(IR_R.shape[0], IR_RT.shape[0])
+                IR_R = IR_R[:min_bands, :]
+                IR_RT = IR_RT[:min_bands, :]
+
             try:
                 dB = int(file[file.index(wildcard_dB_start) + len(wildcard_dB_start): file.index(wildcard_dB_end)]) + dB_correction
             except: # when R 
