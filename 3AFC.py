@@ -35,7 +35,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     test = args.test
     hearing = args.hearing
-    dir_to_loop = f'S:/python/SoftmaxInterpretationModel/{test}/{hearing}/IR/'
+    # if on Windows
+    if platform.system() == 'Windows':
+        dir_to_loop = f'S:/python/SoftmaxInterpretationModel/{test}/{hearing}/IR/'
+    else:
+        dir_to_loop = f'./{test}/{hearing}/IR/'
     TP2_cut_off_Hz = 500
     num_fibers = 1903# 952
 

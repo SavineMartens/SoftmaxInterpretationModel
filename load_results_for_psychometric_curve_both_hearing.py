@@ -155,71 +155,135 @@ if __name__ == "__main__":
         ax.set_ylim((30, 101))
     plt.suptitle(f'Softmax RTmax Psychometric Curves - {test}', fontsize=16)
 
-    # for sigma in sigma_values:
-    #     print(sigma)
-    #     data_NH = np.load([f for f in all_files_NH if f'sigmaSF_{sigma}_' in f][0], allow_pickle=True).item()
-    #     data_EH = np.load([f for f in all_files_EH if f'sigmaSF_{sigma}_' in f][0], allow_pickle=True).item()
-    #     # temp = data_NH['temperature']
-    #     # if temp not in temp_values:
-    #         # continue
-    #     # figure Hamacher RTmax
-    #     fig_Hamacher_RTmax, axes = plt.subplots(1, 2, figsize=(10, 10), num=f'Hamacher RTmax - {test}')
-    #     # fig_Hamacher_RTmax.canvas.set_window_title(f'Hamacher RTmax - {test}')
-    #     axes = axes.flatten()
-    #     axes[0].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RTmax'], label=f'EH, σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #     try:
-    #         axes[0].plot(data_EH['dB_list'], data_EH['y_fit_Hamacher_RTmax'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #     except ValueError:
-    #         pass
-    #     axes[0].set_xlabel('dB re Masker')
-    #     axes[0].set_ylabel('Percentage correct [%]')
-    #     axes[0].set_title('Hamacher: RT_{max} EH')
-    #     axes[0].set_ylim((30, 101))
-    #     axes[0].legend()
-    #     axes[1].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'NH, σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #     try:
-    #         axes[1].plot(data_NH['dB_list'], data_NH['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #     except ValueError:
-    #         pass
-    #     axes[1].set_xlabel('dB re Masker')
-    #     axes[1].set_ylabel('Percentage correct [%]')
-    #     axes[1].set_title('Hamacher: RT NH')
-    #     axes[1].set_ylim((30, 101))
-    #     axes[1].legend()
-    #     fig_Hamacher_RTmax.suptitle(f'Hamacher RTmax- {test}', fontsize=16)
-    #     # plt.tight_layout()
 
-    #     # figure Hamacher RT
-    #     fig_Hamacher_RT, axes = plt.subplots(1, 2, figsize=(10, 10), num=f'Hamacher RT - {test}')
-    #     # fig_Hamacher_RT.canvas.set_window_title(f'Hamacher RT - {test}')
-    #     axes = axes.flatten()
-    #     axes[0].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RT'], label=f'EH, σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #     try:
-    #         axes[0].plot(data_EH['dB_list'], data_EH['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #     except ValueError:
-    #         pass
-    #     axes[0].set_xlabel('dB re Masker')
-    #     axes[0].set_ylabel('Percentage correct [%]')
-    #     axes[0].set_title('Hamacher: RT EH')
-    #     axes[0].set_ylim((30, 101))
-    #     axes[0].legend()
-    #     axes[1].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'NH, σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #     try:
-    #         axes[1].plot(data_NH['dB_list'], data_NH['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #     except ValueError:
-    #         pass
-    #     axes[1].set_xlabel('dB re Masker')
-    #     axes[1].set_ylabel('Percentage correct [%]')
-    #     axes[1].set_title('Hamacher: RT NH')
-    #     axes[1].set_ylim((30, 101))
-    #     axes[1].legend()
-    #     fig_Hamacher_RT.suptitle(f'Hamacher RT- {test}', fontsize=16)
-    #     # plt.tight_layout()
+    # Hamacher figure RT vs RTmax for varying sigma
+    figHam, axes = plt.subplots(2, 1, figsize=(15, 7), sharex=True, sharey=True)
+    for sigma in desired_sigma_values:
+        for file in all_files_NH:
+            if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
+                print(file)
+                data_NH = np.load(file, allow_pickle=True).item()
+                axes[0].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                try:
+                    axes[0].plot(data_NH['dB_list'], data_NH['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                except ValueError:
+                    pass
+                axes[0].set_title(f'NH - {test}')
+                axes[0].legend()
+        for file in all_files_EH:
+            if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
+                print(file)
+                data_EH = np.load(file, allow_pickle=True).item()
+                axes[1].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                try:
+                    axes[1].plot(data_EH['dB_list'], data_EH['y_fit_Hamacher_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                except ValueError:
+                    pass
+                axes[1].set_title(f'EH - {test}')
+                axes[1].legend()
 
-    #     # figure: Softmax RTmax, fixed sigma, varying temp
-    #     # fig_Softmax_RTmax, axes = plt.subplots(1, 2, figsize=(10, 10), figname=f'Softmax RTmax - {test}, sigma={sigma}')
-    #     # axes = axes.flatten()
-    #     waitforbuttonpress = True
+  # figure 4 subplots: softmax RT varying temp, fixed sigma, NH vs EH
+    fig, axes = plt.subplots(2, 2, figsize=(15, 10), sharex=True, sharey=True)
+    # subplot 1: fixed sigma EH
+    for temp in desired_temp_values:
+        for file in all_files_EH:
+            if f'temp_{temp}_' in file and f'sigmaSF_{fixed_sigma}_' in file:
+                print(file)
+                data_EH = np.load(file, allow_pickle=True).item()
+                sigma = data_EH['sigma_SF']
+                axes[0,0].scatter(data_EH['dB_list'], data_EH['y_soft_RT'], label=f'T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
+                try:
+                    axes[0,0].plot(data_EH['dB_list'], data_EH['y_fit_soft_RT'], color=colors_temp[np.where(temp_values == temp)[0][0]])
+                except ValueError:
+                    pass
+                axes[0,0].set_title(f'NH, fixed sigma={fixed_sigma}')
+                axes[0,0].legend()
+
+    # subplot 2: fixed temp EH
+    for sigma in desired_sigma_values:
+        for file in all_files_EH:
+            if f'temp_{fixed_temp}_' in file and f'sigmaSF_{sigma}_' in file:
+                print(file)
+                data_EH = np.load(file, allow_pickle=True).item()
+                sigma = data_EH['sigma_SF']
+                axes[0,1].scatter(data_EH['dB_list'], data_EH['y_soft_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                try:
+                    axes[0,1].plot(data_EH['dB_list'], data_EH['y_fit_soft_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                except ValueError:
+                    pass
+                axes[0,1].set_title(f'EH, fixed sigma={fixed_temp}')
+                axes[0,1].legend()
+    # subplot 3: fixed sigma NH
+    for temp in desired_temp_values:
+        for file in all_files_NH:
+            if f'sigmaSF_{fixed_sigma}_' in file and f'temp_{temp}_' in file:
+                print(file)
+                data_NH = np.load(file, allow_pickle=True).item()
+                temp = data_NH['temperature']
+                axes[1,0].scatter(data_NH['dB_list'], data_NH['y_soft_RT'], label=f'temp={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
+                try:
+                    axes[1,0].plot(data_NH['dB_list'], data_NH['y_fit_soft_RT'], color=colors_temp[np.where(temp_values == temp)[0][0]])
+                except ValueError:
+                    pass
+                axes[1,0].set_title(f'NH, fixed sigma={fixed_sigma}')
+                axes[1,0].legend()
+    # subplot 4: fixed temp NH
+    for sigma in desired_sigma_values:
+        for file in all_files_NH:
+            if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
+                print(file)
+                data_NH = np.load(file, allow_pickle=True).item()
+                temp = data_NH['temperature']
+                axes[1,1].scatter(data_NH['dB_list'], data_NH['y_soft_RT'], label=f'σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                try:
+                    axes[1,1].plot(data_NH['dB_list'], data_NH['y_fit_soft_RT'], color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                except ValueError:
+                    pass
+                axes[1,1].set_title(f'NH, fixed temp={fixed_temp}')
+                axes[1,1].legend()
+
+    for ax in axes.flatten():
+        ax.set_xlabel(x_label)
+        ax.set_ylabel('Percentage correct [%]')
+        ax.set_ylim((30, 101))
+    plt.suptitle(f'Softmax RT Psychometric Curves - {test}', fontsize=16)
 
 
-plt.show()
+    # Softmax comparing 4 figs: RT vs RTmax for fixed sigma and fixed temp
+    figComp, axes = plt.subplots(2, 1, figsize=(15, 10), sharex=True, sharey=True)
+    # NH
+    for file in all_files_NH:
+        if f'sigmaSF_{fixed_sigma}_temp_{fixed_temp}_' in file:
+            print(file)
+            data_NH = np.load(file, allow_pickle=True).item()
+            axes[0].scatter(data_NH['dB_list'], data_NH['y_soft_RT'], label='Softmax RT', color='blue')
+            try:
+                axes[0].plot(data_NH['dB_list'], data_NH['y_fit_soft_RT'], color='blue')
+            except ValueError:
+                pass
+            axes[0].scatter(data_NH['dB_list'], data_NH['y_soft_RTmax'], label='Softmax RTmax', color='orange')
+            try:
+                axes[0].plot(data_NH['dB_list'], data_NH['y_fit_soft_RTmax'], color='orange')
+            except ValueError:
+                pass
+            axes[0].set_title(f'NH - {test}')
+            axes[0].legend()
+    # EH
+    for file in all_files_EH:
+        if f'sigmaSF_{fixed_sigma}_temp_{fixed_temp}_' in file:
+            print(file)
+            data_EH = np.load(file, allow_pickle=True).item()
+            axes[1].scatter(data_EH['dB_list'], data_EH['y_soft_RT'], label='Softmax RT', color='blue')
+            try:
+                axes[1].plot(data_EH['dB_list'], data_EH['y_fit_soft_RT'], color='blue')
+            except ValueError:
+                pass
+            axes[1].scatter(data_EH['dB_list'], data_EH['y_soft_RTmax'], label='Softmax RTmax', color='orange')
+            try:
+                axes[1].plot(data_EH['dB_list'], data_EH['y_fit_soft_RTmax'], color='orange')
+            except ValueError:
+                pass
+            axes[1].set_title(f'EH - {test}')
+            axes[1].legend()
+
+    plt.show()
