@@ -16,7 +16,7 @@ from utilities import fit_best_sigmoid
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Load and plot results for psychometric curve")
-    parser.add_argument("-test", type=str, default="AM", help="Test type (AM or FM)")
+    parser.add_argument("-test", type=str, default="MP", help="Test type (AM or FM)")
     parser.add_argument('-norm', default=True, action='store_true')
     args = parser.parse_args()
 
@@ -49,14 +49,14 @@ if __name__ == "__main__":
         desired_sigma_values = [0.02, 0.04, 0.08, 0.2, 0.4, 0.8]
         desired_temp_values = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
         fixed_sigma = 0.04 #0.08
-        fixed_temp = 0.027 #0.081
+        fixed_temp = 0.009 #0.081
         x_label = 'Modulation Depth (dB)'
     elif test == 'MP':
         test_str = 'Masker Probe'
         desired_sigma_values = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
         desired_temp_values = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
-        fixed_sigma = 0.081
-        fixed_temp = 0.027
+        fixed_sigma = 0.001 # 0.081
+        fixed_temp = 0.003 # 0.027
         x_label = 'Probe dB re masker'
 
     for file in all_files_NH:

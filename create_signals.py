@@ -142,7 +142,7 @@ def create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulatio
     reference_stimulus = apply_gaussian_ramp(reference_stimulus, Fs)
 
     # create unmodulated tone
-    unmodulated_dB = 65 # dB
+    unmodulated_dB = 55 # dB
     t = np.linspace(0, sound_duration, int(sound_duration*Fs))
     unmodulated_amplitude_dB_reduction =  unmodulated_dB -reference_dB 
     unmodulated_amplitude = amplitude_reference*10**(unmodulated_amplitude_dB_reduction/20) # A = A_ref * 10 ^(dB/20)
@@ -196,8 +196,8 @@ def create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulatio
 
     t_full = np.linspace(0, len(modulated_stimulus.get_array_of_samples())/Fs, len(modulated_stimulus.get_array_of_samples()))
 
-    audio_out_file_unmodulated = './sounds/AM/unmodulated_reference91.wav'
-    audio_out_file_modulated = './sounds/AM/modulated_reference91_' + str(modulation_dB) + 'dB.wav'
+    audio_out_file_unmodulated = f'./sounds/AM/unmodulated_reference91_{unmodulated_dB}dB.wav'
+    audio_out_file_modulated = f'./sounds/AM/modulated_reference91_{unmodulated_dB}dB_{modulation_dB}dB.wav'
     unmodulated_stimulus.export(audio_out_file_unmodulated, format="wav")
     modulated_stimulus.export(audio_out_file_modulated, format="wav")
 
@@ -218,10 +218,10 @@ def create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulatio
         plt.legend()
   
 
-# for dB in range(21):
-#     modulation_dB = -3*dB
-#     print(modulation_dB)
-#     create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=True)
+for dB in range(21):
+    modulation_dB = -3*dB
+    print(modulation_dB)
+    create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=True)
 
 
 
@@ -229,7 +229,7 @@ def create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulatio
 frequency = 1e3 # 1kHz
 masker_duration=100e-3 # s
 probe_duration = 10e-3 # s
-masker_dB = 65 # dB
+
 
 
 
@@ -306,7 +306,9 @@ def create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB, probe_
     masker_probe.export(audio_out_file, format="wav")
     masker.export(audio_out_file_masker, format="wav")
 
-for dB in range(21, 25, 1):
+masker_dB = 55 # dB
+
+for dB in range(1, 25, 1):
     probe_dB = masker_dB - 3*dB
     print(-3*dB, 'dB:', probe_dB, 'dB')
     create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB=masker_dB, probe_dB=probe_dB, frequency=frequency, plot=True)
