@@ -10,8 +10,9 @@ from utilities import fit_best_sigmoid
 # [X] run 3AFC & AMP with values from doc
 # [X] als run with True normalization
 # [X] improve fitting procedure 
-# [ ] fit without -80 dB
+# [ ] fit without -80 dB?
 # [ ] more sigma for old Hamacher
+# [ ] NH with 55 dB
 
 
 if __name__ == "__main__":
@@ -20,19 +21,26 @@ if __name__ == "__main__":
     parser.add_argument('-norm', default=True, action='store_true')
     args = parser.parse_args()
 
+    NH_dB = 55
+
+
+
     test = args.test
     if args.norm:
         norm_bool = True
     else:
         norm_bool = False
 
-    try:
-        folder_results_NH = f'S:/python/SoftmaxInterpretationModel/output/{test}/NH/results/seed42/' 
-        folder_results_EH = f'S:/python/SoftmaxInterpretationModel/output/{test}/EH/results/'
-    except:
-        print('Connection to cluster not working')
-        folder_results_NH = f'./output/{test}/NH/results/'
-        folder_results_EH = f'./output/{test}/EH/results/'
+    # try:
+    folder_results_NH = f'S:/python/SoftmaxInterpretationModel/output/{test}/NH/results/seed42/' 
+    folder_results_EH = f'S:/python/SoftmaxInterpretationModel/output/{test}/EH/results/'
+    # except:
+    #     print('Connection to cluster not working')
+    #     folder_results_NH = f'./output/{test}/NH/results/'
+    #     folder_results_EH = f'./output/{test}/EH/results/'
+
+    if NH_dB == 55:
+        folder_results_NH = os.path.join(folder_results_NH, f'{NH_dB}dB/')
 
     all_files_NH = sorted(glob.glob(os.path.join(folder_results_NH, f'*norm*{norm_bool}.npy')))
     all_files_EH = sorted(glob.glob(os.path.join(folder_results_EH, f'*norm*{norm_bool}.npy')))
@@ -305,5 +313,9 @@ if __name__ == "__main__":
         ax.legend()
     plt.suptitle(f'Softmax Psychometric Curves - {test_str},\n comparing RT vs RTmax with T={fixed_temp} and sigma={fixed_sigma}', fontsize=16)
     figCompRTvsRTmax.savefig(f'./output/{test}/Softmax_Comparison_RT_vs_RTmax_temp_{fixed_temp}_sigma_{fixed_sigma}_norm_{norm_bool}.png')
+
+
+
+
 
     plt.show()

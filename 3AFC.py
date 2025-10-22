@@ -16,12 +16,13 @@ import platform
 # [ ] implement Gumbel distributed noise 
 # [ ] check if this is similar to e-softmax in this paper: https://pmc.ncbi.nlm.nih.gov/articles/PMC5001502/pdf/nihms780191.pdf
 # [X] check why it softmax won't go below 67%
-# [ ] check if using selected number of bands does allow to reach 100%
+# [X] check if using selected number of bands does allow to reach 100% --> does not seem to change that much
 # [X] check why NH with MP has differences in loudness wrt R 
 # [X] Try MP with other folder
 # [X] figure as in paper with NH and EH side by side
 # [X] include R in 3AFC
 # [X] create seed42 folder for AM as well
+
 
 if platform.system() == 'Linux':
     plt.switch_backend('agg')
@@ -43,6 +44,8 @@ if __name__ == "__main__":
     TP2_cut_off_Hz = 500
     num_fibers = 1903# 952
 
+    NH_dB = 55
+
     if args.norm:
         norm_bool = True
     else:
@@ -55,14 +58,14 @@ if __name__ == "__main__":
 
     if test == 'AM':
         if hearing == 'NH':
-            wildcard_R = f'*unmodulated*reference91*'
-            wildcard_RT_max = f'*modulated*reference91*_0dB*'
-            wildcard_dB_start = '91_'
+            wildcard_R = f'*unmodulated*reference91_{NH_dB}*'
+            wildcard_RT_max = f'*modulated*reference91_{NH_dB}*_0dB*'
+            wildcard_dB_start = f'91_{NH_dB}'
             wildcard_dB_end = 'dB_IR'
             num_bands = 24
             dir_to_loop += 'seed42/'
-            save_dir_figure += 'seed42/'
-            save_dir_results += 'seed42/'
+            save_dir_figure += f'seed42/{NH_dB}dB/'
+            save_dir_results += f'seed42/{NH_dB}dB/'
         if hearing == 'EH':
             wildcard_R = f'*unmodulated*reference1*'
             wildcard_RT_max = f'*modulated*reference1*_0dB*'
@@ -72,10 +75,10 @@ if __name__ == "__main__":
     if test == 'MP':
         if hearing == 'NH':
             dir_to_loop += 'seed42/'
-            save_dir_figure += 'seed42/'
-            save_dir_results += 'seed42/'
-            wildcard_R = f'*masker_reference91_65_*'
-            wildcard_RT_max = f'*masker_reference91_65dB_probe_65dB*'
+            save_dir_figure += f'seed42/{NH_dB}dB/'
+            save_dir_results += f'seed42/{NH_dB}dB/'
+            wildcard_R = f'*masker_reference91_{NH_dB}_*'
+            wildcard_RT_max = f'*masker_reference91_{NH_dB}dB_probe_65dB*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_IR'
             num_bands = 24
@@ -110,14 +113,15 @@ if __name__ == "__main__":
         IR_R = IR_R[:min_bands, :]
         IR_RT_max = IR_RT_max[:min_bands, :]
 
+    if NH_dB:
+        dB_sel = f'*91_{NH_dB}*' 
+    else:
+        dB_sel = '*'
+
     # S memory in softmax
     S = IR_RT_max - IR_R
-    files = glob.glob(dir_to_loop + f'*{num_fibers}CFs_{num_bands}bands*{TP2_cut_off_Hz}Hz.npy')
-    # files.remove(R_name)    
-    # if platform.system() == 'Windows':
-    #     scaling_factor_sigma_list = [0.2, 2.2]
-    #     temperature_list = [0.0002, 2.2] 
-    # else:
+    files = glob.glob(dir_to_loop + dB_sel + f'{num_fibers}CFs_{num_bands}bands*{TP2_cut_off_Hz}Hz.npy')
+
     if test == 'AM':
         scaling_factor_sigma_list = [0.02, 0.04, 0.06, 0.08, 0.2, 0.4, 0.6, 0.8]
         temperature_list =  [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
