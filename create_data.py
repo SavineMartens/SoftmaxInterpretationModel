@@ -147,7 +147,7 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
 
 
 
-    sound_files = sorted(glob.glob(f'./sounds/{test}/*reference91_55dB*_{dB_str}.wav'))  
+    sound_files = sorted(glob.glob(f'./sounds/{test}/*reference91_55dB.wav'))  #dB*_{dB_str}
     print(f'Found {len(sound_files)} sound files for NH.')
 
 
@@ -241,6 +241,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     TP2_cut_off_Hz = 500  # Hz
+    print('Only running for', args.dB)
 
     print(f"\n Running {args.test} for {args.hearing} (create_files={args.create_files}, plot_files={args.plot_files})\n")
 
