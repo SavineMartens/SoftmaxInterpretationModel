@@ -218,10 +218,10 @@ def create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulatio
         plt.legend()
   
 
-for dB in range(21):
-    modulation_dB = -3*dB
-    print(modulation_dB)
-    create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=True)
+# for dB in range(21):
+#     modulation_dB = -3*dB
+#     print(modulation_dB)
+#     create_AM_tone_with_reference(carrier_frequency=carrier_frequency, modulation_frequency=modulation_frequency, sound_duration=300e-3, modulation_dB=modulation_dB, Fs=44100, plot=True)
 
 
 
@@ -308,7 +308,7 @@ def create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB, probe_
 
 masker_dB = 55 # dB
 
-for dB in range(1, 25, 1):
+for dB in [0]:#range(1, 25, 1):
     probe_dB = masker_dB - 3*dB
     print(-3*dB, 'dB:', probe_dB, 'dB')
     create__varying_amplitude_masker_probe_stimuli_w_reference(masker_dB=masker_dB, probe_dB=probe_dB, frequency=frequency, plot=True)

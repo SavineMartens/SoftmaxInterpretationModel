@@ -30,7 +30,7 @@ if platform.system() == 'Linux':
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-test', type=str, default='AM', help='AM or MP')
+    parser.add_argument('-test', type=str, default='MP', help='AM or MP')
     parser.add_argument('-hearing', type=str, default='NH', help='NH or EH')
     parser.add_argument('-norm', default=False, action='store_true')
     args = parser.parse_args()
@@ -78,7 +78,7 @@ if __name__ == "__main__":
             save_dir_figure += f'seed42/{NH_dB}dB/'
             save_dir_results += f'seed42/{NH_dB}dB/'
             wildcard_R = f'*masker_reference91_{NH_dB}_*'
-            wildcard_RT_max = f'*masker_reference91_{NH_dB}dB_probe_65dB*'
+            wildcard_RT_max = f'*masker_reference91_{NH_dB}dB_probe_{NH_dB}dB*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_IR'
             num_bands = 24
