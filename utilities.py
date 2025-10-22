@@ -170,3 +170,64 @@ def load_mat_virtual_all_thresholds(matfile, nerve_model_type=3, state=1, array_
     # x=3
 
     return T_levels, M_levels, TI_env_log2, TIa, TIb, Ln, Le, PW, Fn, Fe
+
+
+# best fit sigmoid
+def sigmoid1(x, L ,x0, k, b):
+    # L is responsible for scaling the output range from [0,1] to [0,L]
+    # b adds bias to the output and changes its range from [0,L] to [b,L+b]
+    # k is responsible for scaling the input, which remains in (-inf,inf)
+    # x0 is the point in the middle of the Sigmoid, i.e. the point where Sigmoid should originally output the value 1/2 [since if x=x0, we get 1/(1+exp(0)) = 1/2].
+    # b = min(max(50, b), 33) # max(33, b)
+    # L = max(100, L) # min(100-b, L)
+    y = L / (1 + np.exp(-k*(x-x0))) + b
+    return (y)
+
+def sigmoid2(x, L ,x0, k, b):
+    # L is responsible for scaling the output range from [0,1] to [0,L]
+    # b adds bias to the output and changes its range from [0,L] to [b,L+b]
+    # k is responsible for scaling the input, which remains in (-inf,inf)
+    # x0 is the point in the middle of the Sigmoid, i.e. the point where Sigmoid should originally output the value 1/2 [since if x=x0, we get 1/(1+exp(0)) = 1/2].
+    L = max(100, L)
+    y = L / (1 + np.exp(-k*(x-x0))) + b
+    return (y)
+
+def sigmoid3(x, L ,x0, k, b):
+    # L is responsible for scaling the output range from [0,1] to [0,L]
+    # b adds bias to the output and changes its range from [0,L] to [b,L+b]
+    # k is responsible for scaling the input, which remains in (-inf,inf)
+    # x0 is the point in the middle of the Sigmoid, i.e. the point where Sigmoid should originally output the value 1/2 [since if x=x0, we get 1/(1+exp(0)) = 1/2].
+    b = max(33, b)    
+    L = min(100-b, L)
+    y = L / (1 + np.exp(-k*(x-x0))) + b
+    return (y)
+
+def sigmoid4(x, L ,x0, k, b):
+    # L is responsible for scaling the output range from [0,1] to [0,L]
+    # b adds bias to the output and changes its range from [0,L] to [b,L+b]
+    # k is responsible for scaling the input, which remains in (-inf,inf)
+    # x0 is the point in the middle of the Sigmoid, i.e. the point where Sigmoid should originally output the value 1/2 [since if x=x0, we get 1/(1+exp(0)) = 1/2].
+    # b = max(33, b)    
+    L = min(100, L)
+    y = L / (1 + np.exp(-k*(x-x0))) + b
+    return (y)
+
+def fit_best_sigmoid(xdata, ydata):
+            # L              x0            k  b 
+    p0 =    [max(ydata), np.median(xdata), 1, min(ydata)] #[max(ydata), np.median(xdata), 1, min(ydata)] # this is an mandatory initial guess)
+    popt, pcov = curve_fit(sigmoid1, xdata, ydata, p0, method='dogbox', maxfev=2e6)
+    y1 = sigmoid1(xdata, *popt)
+    sse1 = np.sum((y1 - ydata)**2)
+    popt, pcov = curve_fit(sigmoid2, xdata, ydata, p0, method='dogbox', maxfev=2e6)
+    y2 = sigmoid2(xdata, *popt)
+    sse2 = np.sum((y2 - ydata)**2) # sum of squared errors
+    popt, pcov = curve_fit(sigmoid3, xdata, ydata, p0, method='dogbox', maxfev=2e6)
+    y3 = sigmoid3(xdata, *popt)
+    sse3 = np.sum((y3 - ydata)**2)
+    popt, pcov = curve_fit(sigmoid4, xdata, ydata, p0, method='dogbox', maxfev=2e6)
+    y4 = sigmoid4(xdata, *popt)
+    sse4 = np.sum((y4 - ydata)**2)
+    y = [y1, y2, y3, y4][np.argmin([sse1, sse2, sse3, sse4])] # choose the best fit
+    # print(np.argmin([sse1, sse2, sse3, sse4]))
+    # print('summed squared error = ', np.sum((y - ydata)**2))
+    return y
