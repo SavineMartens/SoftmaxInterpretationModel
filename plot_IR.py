@@ -14,7 +14,7 @@ import matplotlib as mpl
 
 
 if __name__ == "__main__":
-    test = 'MP'  # 'AM' or 'MP'
+    test = 'AM'  # 'AM' or 'MP'
     hearing = 'EH'  # 'NH' or 'EH'
     folder_IR = f'S:/python/SoftmaxInterpretationModel/{test}/{hearing}/IR/' #f'./{test}/{hearing}/IR/'
     num_fibers = 1903# 952

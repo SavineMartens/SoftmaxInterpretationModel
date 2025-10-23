@@ -109,6 +109,8 @@ def process_electric_hearing(test, create_files=False, plot_files=True, TP2_cut_
             # IR_path = os.path.join(save_dir_IR,
             #                     os.path.basename(file).replace('spike_trains_F120', 'neurogram')
             #                     + f'_{num_fibers}CFs_{IR.shape[0]}bands_TP2_{TP2_cut_off_Hz}Hz.npy')
+            # same size as NH
+            IR = IR[:, :1250]
 
             save_numpy(neurogram, neurogram_path)
             save_numpy(IR, IR_path)
