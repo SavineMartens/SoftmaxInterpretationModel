@@ -4,6 +4,7 @@ import glob
 import os
 import argparse
 from utilities import fit_best_sigmoid
+import matplotlib.transforms as mtransforms # labeling axes
 
 # To do
 # [X] create neurograms with smaller probe amplitudes for MP
@@ -11,19 +12,29 @@ from utilities import fit_best_sigmoid
 # [X] als run with True normalization
 # [X] improve fitting procedure 
 # [X] more sigma for old Hamacher --> did not improve figure
-# [X] NH with 55 dB
-# [ ] fit without -80 dB?
+# [X] fit without -80 dB?
+# [X] label figs
+# [ ] NH with 55 dB
+
+
+def remove_R(data):
+    data['y_soft_RT'] = data['y_soft_RT'][data['dB_list'] > -79]
+    data['y_Hamacher_RT'] = data['y_Hamacher_RT'][data['dB_list'] > -79 ]
+    data['y_Hamacher_RTmax'] = data['y_Hamacher_RTmax'][data['dB_list'] > -79]
+    data['y_soft_RTmax'] = data['y_soft_RTmax'][data['dB_list'] > -79]
+    data['dB_list'] = data['dB_list'][data['dB_list'] > -79]
+    return data
 
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Load and plot results for psychometric curve")
-    parser.add_argument("-test", type=str, default="AM", help="Test type (AM or FM)")
-    parser.add_argument('-norm', default=True, action='store_true')
-    parser.add_argument('-wo_R', default=False, action='store_true')
+    parser.add_argument("-test", type=str, default="MP", help="Test type (AM or FM)")
+    parser.add_argument('-norm', default=False, action='store_true')
+    parser.add_argument('-wo_R', default=True, action='store_true')
     args = parser.parse_args()
 
-    NH_dB = 55
+    NH_dB = 65
 
     test = args.test
     if args.norm:
@@ -63,6 +74,9 @@ if __name__ == "__main__":
     sigma_values_EH = []
     temp_values_EH = []
 
+    x_pos = -0.003
+    y_pos = 0.07
+
     # desired values
     if test == 'AM':
         test_str = 'Amplitude Modulation'
@@ -75,8 +89,8 @@ if __name__ == "__main__":
         test_str = 'Masker Probe'
         desired_sigma_values = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
         desired_temp_values = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
-        fixed_sigma = 0.027 #0.081
-        fixed_temp = 0.009 #0.027
+        fixed_sigma = 0.081
+        fixed_temp = 0.027
         x_label = 'Probe dB re masker'
 
     for file in all_files_NH:
@@ -123,13 +137,11 @@ if __name__ == "__main__":
                 print(file)
                 data_EH = np.load(file, allow_pickle=True).item()
                 if wo_R: # remove -80 dB and y_val
-                    data_EH['dB_list'] = data_EH['dB_list'][data_EH['dB_list'] > -79]
-                    data_EH['y_soft_RTmax'] = data_EH['y_soft_RTmax'][data_EH['dB_list'] > -79]
+                    data_EH = remove_R(data_EH)
                 sigma = data_EH['sigma_SF']
                 axes[0,0].scatter(data_EH['dB_list'], data_EH['y_soft_RTmax'], label=f'T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
                 axes[0,0].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RTmax']), color=colors_temp[np.where(temp_values == temp)[0][0]])
                 axes[0,0].set_title(f'EH: fixed sigma={fixed_sigma}')
-                axes[0,0].legend()
 
     # subplot 2: fixed temp EH
     for sigma in desired_sigma_values:
@@ -138,13 +150,11 @@ if __name__ == "__main__":
                 print(file)
                 data_EH = np.load(file, allow_pickle=True).item()
                 if wo_R: # remove -80 dB and y_val
-                    data_EH['dB_list'] = data_EH['dB_list'][data_EH['dB_list'] > -79]
-                    data_EH['y_soft_RTmax'] = data_EH['y_soft_RTmax'][data_EH['dB_list'] > -79]
+                    data_EH = remove_R(data_EH)
                 sigma = data_EH['sigma_SF']
                 axes[0,1].scatter(data_EH['dB_list'], data_EH['y_soft_RTmax'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[0,1].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RTmax']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[0,1].set_title(f'EH: fixed temp={fixed_temp}')
-                axes[0,1].legend()
     # subplot 3: fixed sigma NH
     for temp in desired_temp_values:
         for file in all_files_NH:
@@ -152,13 +162,12 @@ if __name__ == "__main__":
                 print(file)
                 data_NH = np.load(file, allow_pickle=True).item()
                 if wo_R: # remove -80 dB and y_val
-                    data_NH['dB_list'] = data_NH['dB_list'][data_NH['dB_list'] > -79]
-                    data_NH['y_soft_RTmax'] = data_NH['y_soft_RTmax'][data_NH['dB_list'] > -79]
+                    data_NH = remove_R(data_NH)
                 temp = data_NH['temperature']
                 axes[1,0].scatter(data_NH['dB_list'], data_NH['y_soft_RTmax'], label=f'temp={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
                 axes[1,0].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_soft_RTmax']), color=colors_temp[np.where(temp_values == temp)[0][0]])
                 axes[1,0].set_title(f'NH: fixed sigma={fixed_sigma}')
-                axes[1,0].legend()
+
     # subplot 4: fixed temp NH
     for sigma in desired_sigma_values:
         for file in all_files_NH:
@@ -166,67 +175,24 @@ if __name__ == "__main__":
                 print(file)
                 data_NH = np.load(file, allow_pickle=True).item()
                 if wo_R: # remove -80 dB and y_val
-                    data_NH['dB_list'] = data_NH['dB_list'][data_NH['dB_list'] > -79]
-                    data_NH['y_soft_RTmax'] = data_NH['y_soft_RTmax'][data_NH['dB_list'] > -79]
+                    data_NH = remove_R(data_NH)
                 temp = data_NH['temperature']
                 axes[1,1].scatter(data_NH['dB_list'], data_NH['y_soft_RTmax'], label=f'σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[1,1].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_soft_RTmax']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[1,1].set_title(f'NH: fixed temp={fixed_temp}')
-                axes[1,1].legend()
-
-    for ax in axes.flatten():
+    trans = mtransforms.ScaledTranslation(10/72, -5/72, figSoftRTmax.dpi_scale_trans)
+    letters = ['A', 'B', 'C', 'D']
+    for a, ax in enumerate(axes.flatten()):
         ax.set_xlabel(x_label)
         ax.set_ylabel('Percentage correct [%]')
-        ax.set_ylim((30, 101))
+        ax.set_ylim((25, 101))
         ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
+        ax.legend()
+        ax.text(x_pos, y_pos+0.02, letters[a], transform=ax.transAxes + trans,
+            fontsize=16, verticalalignment='top', color='black')
     plt.suptitle(f'Softmax RTmax Psychometric Curves - {test_str}', fontsize=16)
     figSoftRTmax.savefig(f'{output_dir}Softmax_RTmax_Psychometric_Curves_temp_{fixed_temp}_sigma_{fixed_sigma}_norm_{norm_bool}{wo_R_str}.png')
 
-
-    # Hamacher figure RT vs RTmax for varying sigma
-    figHamRT_vs_RTmax, axes = plt.subplots(2, 2, figsize=(15, 7), sharex=True, sharey=True)
-    axes = axes.flatten()
-    # NH subplot 1 en 2
-    for sigma in desired_sigma_values:
-        for file in all_files_NH:
-            if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
-                print(file)
-                data_NH = np.load(file, allow_pickle=True).item()
-                if wo_R: # remove -80 dB and y_val
-                    data_NH['dB_list'] = data_NH['dB_list'][data_NH['dB_list'] > -79]
-                    data_NH['y_Hamacher_RT'] = data_NH['y_Hamacher_RT'][data_NH['dB_list'] > -79]
-                    data_NH['y_Hamacher_RTmax'] = data_NH['y_Hamacher_RTmax'][data_NH['dB_list'] > -79]
-                axes[0].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[0].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_Hamacher_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[0].set_title(f'NH RT')
-                axes[0].legend()
-                axes[1].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RTmax'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[1].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_Hamacher_RTmax']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[1].set_title(f'NH RTmax')
-                axes[1].legend()
-    # EH subplot 3 en 4
-        for file in all_files_EH:
-            if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
-                print(file)
-                data_EH = np.load(file, allow_pickle=True).item()
-                if wo_R: # remove -80 dB and y_val
-                    data_EH['dB_list'] = data_EH['dB_list'][data_EH['dB_list'] > -79]
-                    data_EH['y_Hamacher_RT'] = data_EH['y_Hamacher_RT'][data_EH['dB_list'] > -79]
-                    data_EH['y_Hamacher_RTmax'] = data_EH['y_Hamacher_RTmax'][data_EH['dB_list'] > -79]
-                axes[2].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[2].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_Hamacher_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[2].set_title(f'EH - RT')
-                axes[3].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RTmax'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[3].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_Hamacher_RTmax']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])    
-                axes[3].set_title(f'EH - RTmax')
-    for ax in axes:
-        ax.set_xlabel(x_label)
-        ax.set_ylabel('Percentage correct [%]')
-        ax.set_ylim((30, 101))
-        ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
-        ax.legend()
-    plt.suptitle(f'Hamacher Psychometric Curves - {test_str}, comparing RT vs RTmax', fontsize=16)
-    figHamRT_vs_RTmax.savefig(f'{output_dir}Hamacher_RT_vs_RTmax_Psychometric_Curves_sigma{desired_sigma_values}{wo_R_str}.png')
 
   # figure 4 subplots: softmax RT varying temp, fixed sigma, NH vs EH
     figSoftRT, axes = plt.subplots(2, 2, figsize=(15, 10), sharex=True, sharey=True)
@@ -237,14 +203,12 @@ if __name__ == "__main__":
                 print(file)
                 data_EH = np.load(file, allow_pickle=True).item()
                 if wo_R: # remove -80 dB and y_val
-                    data_EH['dB_list'] = data_EH['dB_list'][data_EH['dB_list'] > -79]
-                    data_EH['y_soft_RT'] = data_EH['y_soft_RT'][data_EH['dB_list'] > -79]
+                    data_EH = remove_R(data_EH)
                 sigma = data_EH['sigma_SF']
                 axes[0,0].scatter(data_EH['dB_list'], data_EH['y_soft_RT'], label=f'T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
                 fit = fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RT'])
                 axes[0,0].plot(data_EH['dB_list'], fit, color=colors_temp[np.where(temp_values == temp)[0][0]])
                 axes[0,0].set_title(f'EH: fixed sigma={fixed_sigma}')
-                axes[0,0].legend()
 
     # subplot 2: fixed temp EH
     for sigma in desired_sigma_values:
@@ -253,43 +217,49 @@ if __name__ == "__main__":
                 print(file)
                 data_EH = np.load(file, allow_pickle=True).item()
                 if wo_R: # remove -80 dB and y_val
-                    data_EH['dB_list'] = data_EH['dB_list'][data_EH['dB_list'] > -79]
-                    data_EH['y_soft_RT'] = data_EH['y_soft_RT'][data_EH['dB_list'] > -79]
+                    data_EH = remove_R(data_EH)
                 sigma = data_EH['sigma_SF']
                 axes[0,1].scatter(data_EH['dB_list'], data_EH['y_soft_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[0,1].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[0,1].set_title(f'EH: fixed temp={fixed_temp}')
-                axes[0,1].legend()
+
     # subplot 3: fixed sigma NH
     for temp in desired_temp_values:
         for file in all_files_NH:
             if f'sigmaSF_{fixed_sigma}_' in file and f'temp_{temp}_' in file:
                 print(file)
                 data_NH = np.load(file, allow_pickle=True).item()
+                if wo_R: # remove -80 dB and y_val
+                    data_NH = remove_R(data_NH)
                 temp = data_NH['temperature']
                 axes[1,0].scatter(data_NH['dB_list'], data_NH['y_soft_RT'], label=f'temp={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
                 axes[1,0].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_soft_RT']), color=colors_temp[np.where(temp_values == temp)[0][0]])
                 axes[1,0].set_title(f'NH: fixed sigma={fixed_sigma}')
-                axes[1,0].legend()
+
     # subplot 4: fixed temp NH
     for sigma in desired_sigma_values:
         for file in all_files_NH:
             if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
                 print(file)
                 data_NH = np.load(file, allow_pickle=True).item()
+                if wo_R: # remove -80 dB and y_val
+                    data_NH = remove_R(data_NH)
                 temp = data_NH['temperature']
                 axes[1,1].scatter(data_NH['dB_list'], data_NH['y_soft_RT'], label=f'σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[1,1].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_soft_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[1,1].set_title(f'NH: fixed temp={fixed_temp}')
-                axes[1,1].legend()
 
-    for ax in axes.flatten():
+    trans = mtransforms.ScaledTranslation(10/72, -5/72, figSoftRT.dpi_scale_trans)
+    for a, ax in enumerate(axes.flatten()):
         ax.set_xlabel(x_label)
         ax.set_ylabel('Percentage correct [%]')
-        ax.set_ylim((30, 101))
+        ax.set_ylim((25, 101))
         ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
+        ax.legend()
+        ax.text(x_pos, y_pos+0.02, letters[a], transform=ax.transAxes + trans,
+            fontsize=16, verticalalignment='top', color='black')
     plt.suptitle(f'Softmax RT Psychometric Curves - {test_str}', fontsize=16)
-    figSoftRT.savefig(f'{output_dir}Softmax_RT_Psychometric_Curves_temp_{fixed_temp}_sigma_{fixed_sigma}_norm_{norm_bool}.png')
+    figSoftRT.savefig(f'{output_dir}Softmax_RT_Psychometric_Curves_temp_{fixed_temp}_sigma_{fixed_sigma}_norm_{norm_bool}{wo_R_str}.png')
 
 
     # Hamacher RT: NH vs EH loop over sigma
@@ -302,8 +272,7 @@ if __name__ == "__main__":
                 print(file)
                 data_NH = np.load(file, allow_pickle=True).item()
                 if wo_R: # remove -80 dB and y_val
-                    data_NH['dB_list'] = data_NH['dB_list'][data_NH['dB_list'] > -79]
-                    data_NH['y_Hamacher_RT'] = data_NH['y_Hamacher_RT'][data_NH['dB_list'] > -79]
+                    data_NH = remove_R(data_NH)
                 axes[0].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[0].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_Hamacher_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[0].set_title(f'NH')    
@@ -313,17 +282,19 @@ if __name__ == "__main__":
                 print(file)
                 data_EH = np.load(file, allow_pickle=True).item()
                 if wo_R: # remove -80 dB and y_val
-                    data_EH['dB_list'] = data_EH['dB_list'][data_EH['dB_list'] > -79]
-                    data_EH['y_Hamacher_RT'] = data_EH['y_Hamacher_RT'][data_EH['dB_list'] > -79]
+                    data_EH = remove_R(data_EH)
                 axes[1].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[1].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_Hamacher_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[1].set_title(f'EH') 
-    for ax in axes:
+                axes[1].set_title(f'EH')
+    trans = mtransforms.ScaledTranslation(10/72, -5/72, figHamRT.dpi_scale_trans)
+    for a, ax in enumerate(axes.flatten()):
         ax.set_xlabel(x_label)
         ax.set_ylabel('Percentage correct [%]')
-        ax.set_ylim((30, 101))
+        ax.set_ylim((25, 101))
         ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
-        ax.legend() 
+        ax.text(x_pos, y_pos, letters[a], transform=ax.transAxes + trans,
+            fontsize=16, verticalalignment='top', color='black')
+        ax.legend()
     plt.suptitle(f'Hamacher Psychometric Curves - {test_str}', fontsize=16)
     figHamRT.savefig(f'{output_dir}Hamacher_RT_Psychometric_Curves_sigma_{desired_sigma_values}{wo_R_str}.png')
 
@@ -335,9 +306,7 @@ if __name__ == "__main__":
             print(file)
             data_NH = np.load(file, allow_pickle=True).item()
             if wo_R: # remove -80 dB and y_val
-                data_NH['dB_list'] = data_NH['dB_list'][data_NH['dB_list'] > -79]
-                data_NH['y_soft_RT'] = data_NH['y_soft_RT'][data_NH['dB_list'] > -79]
-                data_NH['y_soft_RTmax'] = data_NH['y_soft_RTmax'][data_NH['dB_list'] > -79]
+                data_NH = remove_R(data_NH)
             axes[0].scatter(data_NH['dB_list'], data_NH['y_soft_RT'], label='Softmax RT', color='blue')
             axes[0].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_soft_RT']), color='blue')
             axes[0].scatter(data_NH['dB_list'], data_NH['y_soft_RTmax'], label='Softmax RTmax', color='orange')
@@ -349,20 +318,21 @@ if __name__ == "__main__":
             print(file)
             data_EH = np.load(file, allow_pickle=True).item()
             if wo_R: # remove -80 dB and y_val
-                data_EH['dB_list'] = data_EH['dB_list'][data_EH['dB_list'] > -79]
-                data_EH['y_soft_RT'] = data_EH['y_soft_RT'][data_EH['dB_list'] > -79]
-                data_EH['y_soft_RTmax'] = data_EH['y_soft_RTmax'][data_EH['dB_list'] > -79]
+                data_EH = remove_R(data_EH)
             axes[1].scatter(data_EH['dB_list'], data_EH['y_soft_RT'], label='Softmax RT', color='blue')
             axes[1].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RT']), color='blue')
             axes[1].scatter(data_EH['dB_list'], data_EH['y_soft_RTmax'], label='Softmax RTmax', color='orange')
             axes[1].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RTmax']), color='orange')
             axes[1].set_title(f'EH')
-    for ax in axes:
+    trans = mtransforms.ScaledTranslation(10/72, -5/72, figCompRTvsRTmax.dpi_scale_trans)
+    for a, ax in enumerate(axes.flatten()):
         ax.set_xlabel(x_label)
         ax.set_ylabel('Percentage correct [%]')
-        ax.set_ylim((30, 101))
+        ax.set_ylim((25, 101))
         ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
         ax.legend()
+        ax.text(x_pos, y_pos, letters[a], transform=ax.transAxes + trans,
+            fontsize=16, verticalalignment='top', color='black')
     plt.suptitle(f'Softmax Psychometric Curves - {test_str},\n comparing RT vs RTmax with T={fixed_temp} and sigma={fixed_sigma}', fontsize=16)
     figCompRTvsRTmax.savefig(f'{output_dir}Softmax_Comparison_RT_vs_RTmax_temp_{fixed_temp}_sigma_{fixed_sigma}_norm_{norm_bool}{wo_R_str}.png')
 
@@ -405,6 +375,49 @@ if __name__ == "__main__":
     #     plt.suptitle(f'Hamacher Psychometric Curves - {test_str}', fontsize=16)
     #     figHamRTfull.savefig(f'./output/{test}/Hamacher_RT_Psychometric_Curves_sigma_{desired_sigma_values}.png')
 
+    # # Hamacher figure RT vs RTmax for varying sigma --> ran it incorrectly, so commented out
+    # figHamRT_vs_RTmax, axes = plt.subplots(2, 2, figsize=(15, 10), sharex=True, sharey=True)
+    # axes = axes.flatten()
+    # # NH subplot 1 en 2
+    # for sigma in desired_sigma_values:
+    #     for file in all_files_NH:
+    #         if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
+    #             print(file)
+    #             data_NH = np.load(file, allow_pickle=True).item()
+    #             if wo_R: # remove -80 dB and y_val
+    #                 data_NH = remove_R(data_NH)
+    #             axes[0].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+    #             axes[0].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_Hamacher_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+    #             axes[0].set_title(f'NH RT')
+    #             axes[0].legend()
+    #             axes[1].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RTmax'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+    #             axes[1].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_Hamacher_RTmax']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+    #             axes[1].set_title(f'NH RTmax')
+    #             axes[1].legend()
+    # # EH subplot 3 en 4
+    #     for file in all_files_EH:
+    #         if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
+    #             print(file)
+    #             data_EH = np.load(file, allow_pickle=True).item()
+    #             if wo_R: # remove -80 dB and y_val
+    #                 data_EH = remove_R(data_EH)
+    #             axes[2].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+    #             axes[2].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_Hamacher_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+    #             axes[2].set_title(f'EH - RT')
+    #             axes[3].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RTmax'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+    #             axes[3].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_Hamacher_RTmax']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])    
+    #             axes[3].set_title(f'EH - RTmax')
+    # trans = mtransforms.ScaledTranslation(10/72, -5/72, figHamRT_vs_RTmax.dpi_scale_trans)
+    # for a, ax in enumerate(axes.flatten()):
+    #     ax.set_xlabel(x_label)
+    #     ax.set_ylabel('Percentage correct [%]')
+    #     ax.set_ylim((25, 101))
+    #     ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
+    #     ax.legend()
+    #     ax.text(x_pos, y_pos, letters[a], transform=ax.transAxes + trans,
+    #         fontsize=16, verticalalignment='top', color='black')
+    # plt.suptitle(f'Hamacher Psychometric Curves - {test_str}, comparing RT vs RTmax', fontsize=16)
+    # figHamRT_vs_RTmax.savefig(f'{output_dir}Hamacher_RT_vs_RTmax_Psychometric_Curves_sigma{desired_sigma_values}{wo_R_str}.png')
 
 
     plt.show()

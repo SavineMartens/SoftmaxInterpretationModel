@@ -174,7 +174,7 @@ if __name__ == "__main__":
             # Hamacher
             percentage_correct_Hamacher = Hamacher_3AFC(IR_RT, IR_R,  IR_RT - IR_R, sigma_w, measure='pearson', n_iter=100, use_De=False)
             percentage_correct_Hamacher_matrix[f] = percentage_correct_Hamacher
-            percentage_correct_Hamacher_RTmax = Hamacher_3AFC(IR_RT_max, IR_R,  IR_RT_max - IR_R, sigma_w, measure='pearson', n_iter=100, use_De=False)
+            percentage_correct_Hamacher_RTmax = Hamacher_3AFC(IR_RT, IR_R,  IR_RT_max - IR_R, sigma_w, measure='pearson', n_iter=100, use_De=False)
             percentage_correct_Hamacher_RTmax_matrix[f] = percentage_correct_Hamacher_RTmax
 
             plt.figure('Hamacher collected')

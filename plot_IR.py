@@ -15,19 +15,21 @@ import matplotlib as mpl
 
 if __name__ == "__main__":
     test = 'MP'  # 'AM' or 'MP'
-    hearing = 'NH'  # 'NH' or 'EH'
+    hearing = 'EH'  # 'NH' or 'EH'
     folder_IR = f'S:/python/SoftmaxInterpretationModel/{test}/{hearing}/IR/' #f'./{test}/{hearing}/IR/'
     num_fibers = 1903# 952
     TP2_cut_off_Hz = 500
     Fs_down = 5000 # Downsampled frequency of neurograms and IRs
 
+    NH_dB = 55
+
     if test == 'AM':
         if hearing == 'NH':
-            folder_IR += 'seed42/'
-            wildcard_dB_start = '91_'
-            wildcard_R = '*unmodulated*reference91*'
+            folder_IR += f'seed42/*91_{NH_dB}dB_*'
+            wildcard_dB_start = f'91_{NH_dB}dB_'
+            wildcard_R = f'*unmodulated*reference91_{NH_dB}dB*'
             wildcard_dB_end = 'dB_IR'
-            wildcard_RT_max = f'*modulated*reference91*_0dB*'
+            wildcard_RT_max = f'*modulated*reference91_{NH_dB}dB_0dB*'
         if hearing == 'EH':
             wildcard_dB_start = 'reference1_'
             wildcard_dB_end = 'dB_relscale'
@@ -35,17 +37,17 @@ if __name__ == "__main__":
             wildcard_RT_max = f'*modulated*reference1*_0dB*'
     if test == 'MP':
         if hearing == 'NH':
-            folder_IR += 'seed42/'
-            wildcard_dB_start = 'probe_'
-            wildcard_R = '*masker_reference91_65_*'
+            folder_IR += f'seed42/*91_{NH_dB}dB_'
+            wildcard_dB_start = f'probe_'
+            wildcard_R = f'IR*' #*f'*masker_reference91_{NH_dB}dB*'
             wildcard_dB_end = 'dB_IR'
-            wildcard_RT_max = f'*masker_reference91_65dB_probe_65dB*'
+            wildcard_RT_max = f'probe_{NH_dB}dB_*' #f'*masker_reference91_{NH_dB}dB_probe_{NH_dB}dB*'
         if hearing == 'EH':
             wildcard_dB_start = 'probe_'
             wildcard_R = '*masker_reference1_rel*'
             wildcard_dB_end = 'dB_relscale'
             wildcard_RT_max = f'*masker_reference1_*probe_0*'
-
+ 
 wildcard = f'*{num_fibers}CFs*{TP2_cut_off_Hz}Hz.npy'
 
 single_file = glob.glob(f'{folder_IR}*0dB{wildcard}' )[0] # to get num_bands and num_time_pointsnum_bands, num_time_points = single_file.shape
@@ -198,18 +200,18 @@ for a, ax in zip(np.arange(1,5), axes.flatten()) :
     plt.legend(loc='best')
     
 
-if test == 'MP' and hearing == 'NH':
-    plt.suptitle(f'Masker probe detection: masker (R) and masker-probe (RT)', fontsize=16)
-    figA2.savefig('./paper/figure_A2_MP_NH.png', dpi=300)
-if test == 'AM' and hearing == 'NH':
-    plt.suptitle(f'Amplitude modulation: unmodulated (R) and modulated (RT)', fontsize=16)
-    figA2.savefig('./paper/figure_A2_AM_NH.png', dpi=300)
-if test == 'MP' and hearing == 'EH':
-    plt.suptitle(f'Masker probe detection: masker (R) and masker-probe (RT)', fontsize=16)
-    figA2.savefig('./paper/figure_A2_MP_EH.png', dpi=300)
-if test == 'AM' and hearing == 'EH':
-    plt.suptitle(f'Amplitude modulation: unmodulated (R) and modulated (RT)', fontsize=16)
-    figA2.savefig('./paper/figure_A2_AM_EH.png', dpi=300)
+# if test == 'MP' and hearing == 'NH':
+#     plt.suptitle(f'Masker probe detection: masker (R) and masker-probe (RT)', fontsize=16)
+#     figA2.savefig('./paper/figure_A2_MP_NH.png', dpi=300)
+# if test == 'AM' and hearing == 'NH':
+#     plt.suptitle(f'Amplitude modulation: unmodulated (R) and modulated (RT)', fontsize=16)
+#     figA2.savefig('./paper/figure_A2_AM_NH.png', dpi=300)
+# if test == 'MP' and hearing == 'EH':
+#     plt.suptitle(f'Masker probe detection: masker (R) and masker-probe (RT)', fontsize=16)
+#     figA2.savefig('./paper/figure_A2_MP_EH.png', dpi=300)
+# if test == 'AM' and hearing == 'EH':
+#     plt.suptitle(f'Amplitude modulation: unmodulated (R) and modulated (RT)', fontsize=16)
+#     figA2.savefig('./paper/figure_A2_AM_EH.png', dpi=300)
 
 plt.show()
         

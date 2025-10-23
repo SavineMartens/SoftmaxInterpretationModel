@@ -292,7 +292,7 @@ def  get_Hamacher_IR_from_numpy(fname,
     num_remaining_crit_bands, num_samples = SR.shape
         
     t_unfiltered = np.arange(num_samples)*PW
-    T_a = PW # sampling period
+    T_a = new_binsize # sampling period
     Z = np.zeros(SR.shape)
     Y = np.zeros(SR.shape)
     IR = np.zeros(SR.shape)
