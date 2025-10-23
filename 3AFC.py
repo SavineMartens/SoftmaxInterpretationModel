@@ -30,7 +30,7 @@ if platform.system() == 'Linux':
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-test', type=str, default='MP', help='AM or MP')
+    parser.add_argument('-test', type=str, default='AM', help='AM or MP')
     parser.add_argument('-hearing', type=str, default='NH', help='NH or EH')
     parser.add_argument('-norm', default=False, action='store_true')
     args = parser.parse_args()
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         if hearing == 'NH':
             wildcard_R = f'*unmodulated*reference91_{NH_dB}*'
             wildcard_RT_max = f'*modulated*reference91_{NH_dB}*_0dB*'
-            wildcard_dB_start = f'91_{NH_dB}'
+            wildcard_dB_start = f'91_{NH_dB}dB_'
             wildcard_dB_end = 'dB_IR'
             num_bands = 24
             dir_to_loop += 'seed42/'
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     print(f'Running {test} for {hearing}')
 
     if hearing == 'NH' and test == 'MP':
-        dB_correction = -65
+        dB_correction = -1*NH_dB
     else:
         dB_correction = 0
 
