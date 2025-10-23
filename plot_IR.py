@@ -14,7 +14,7 @@ import matplotlib as mpl
 
 
 if __name__ == "__main__":
-    test = 'AM'  # 'AM' or 'MP'
+    test = 'MP'  # 'AM' or 'MP'
     hearing = 'EH'  # 'NH' or 'EH'
     folder_IR = f'S:/python/SoftmaxInterpretationModel/{test}/{hearing}/IR/' #f'./{test}/{hearing}/IR/'
     num_fibers = 1903# 952
@@ -200,18 +200,18 @@ for a, ax in zip(np.arange(1,5), axes.flatten()) :
     plt.legend(loc='best')
     
 
-# if test == 'MP' and hearing == 'NH':
-#     plt.suptitle(f'Masker probe detection: masker (R) and masker-probe (RT)', fontsize=16)
-#     figA2.savefig('./paper/figure_A2_MP_NH.png', dpi=300)
-# if test == 'AM' and hearing == 'NH':
-#     plt.suptitle(f'Amplitude modulation: unmodulated (R) and modulated (RT)', fontsize=16)
-#     figA2.savefig('./paper/figure_A2_AM_NH.png', dpi=300)
-# if test == 'MP' and hearing == 'EH':
-#     plt.suptitle(f'Masker probe detection: masker (R) and masker-probe (RT)', fontsize=16)
-#     figA2.savefig('./paper/figure_A2_MP_EH.png', dpi=300)
-# if test == 'AM' and hearing == 'EH':
-#     plt.suptitle(f'Amplitude modulation: unmodulated (R) and modulated (RT)', fontsize=16)
-#     figA2.savefig('./paper/figure_A2_AM_EH.png', dpi=300)
+if test == 'MP' and hearing == 'NH':
+    plt.suptitle(f'Masker probe detection: masker (R) and masker-probe (RT)', fontsize=16)
+    figA2.savefig('./paper/figure_A2_MP_NH.png', dpi=300)
+if test == 'AM' and hearing == 'NH':
+    plt.suptitle(f'Amplitude modulation: unmodulated (R) and modulated (RT)', fontsize=16)
+    figA2.savefig('./paper/figure_A2_AM_NH.png', dpi=300)
+if test == 'MP' and hearing == 'EH':
+    plt.suptitle(f'Masker probe detection: masker (R) and masker-probe (RT)', fontsize=16)
+    figA2.savefig('./paper/figure_A2_MP_EH.png', dpi=300)
+if test == 'AM' and hearing == 'EH':
+    plt.suptitle(f'Amplitude modulation: unmodulated (R) and modulated (RT)', fontsize=16)
+    figA2.savefig('./paper/figure_A2_AM_EH.png', dpi=300)
 
 plt.show()
         

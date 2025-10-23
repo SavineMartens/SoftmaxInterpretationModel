@@ -31,7 +31,7 @@ if platform.system() == 'Linux':
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-test', type=str, default='AM', help='AM or MP')
-    parser.add_argument('-hearing', type=str, default='NH', help='NH or EH')
+    parser.add_argument('-hearing', type=str, default='EH', help='NH or EH')
     parser.add_argument('-norm', default=False, action='store_true')
     args = parser.parse_args()
     test = args.test
@@ -62,7 +62,6 @@ if __name__ == "__main__":
             wildcard_RT_max = f'*modulated*reference91_{NH_dB}*_0dB*'
             wildcard_dB_start = f'91_{NH_dB}dB_'
             wildcard_dB_end = 'dB_IR'
-            num_bands = 24
             dir_to_loop += 'seed42/'
             save_dir_figure += f'seed42/{NH_dB}dB/'
             save_dir_results += f'seed42/{NH_dB}dB/'
@@ -71,7 +70,6 @@ if __name__ == "__main__":
             wildcard_RT_max = f'*modulated*reference1*_0dB*'
             wildcard_dB_start = 'reference1_'
             wildcard_dB_end = 'dB_relscale'
-            num_bands = 28
     if test == 'MP':
         if hearing == 'NH':
             dir_to_loop += 'seed42/'
@@ -81,16 +79,15 @@ if __name__ == "__main__":
             wildcard_RT_max = f'*masker_reference91_{NH_dB}dB_probe_{NH_dB}dB*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_IR'
-            num_bands = 24
         if hearing == 'EH':
             wildcard_R = f'*masker_reference1_rel*'
             wildcard_RT_max = f'*masker_reference1_*probe_0*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_relscale'
-            num_bands = 24
+            
     
 
-
+    num_bands = 24
     print(f'Running {test} for {hearing}')
 
     if hearing == 'NH' and test == 'MP':
@@ -113,7 +110,7 @@ if __name__ == "__main__":
         IR_R = IR_R[:min_bands, :]
         IR_RT_max = IR_RT_max[:min_bands, :]
 
-    if NH_dB:
+    if NH_dB and hearing == 'NH':
         dB_sel = f'*91_{NH_dB}*' 
     else:
         dB_sel = '*'
