@@ -10,7 +10,7 @@ from utilities import *
 import platform
 
 # To do
-# [ ] run with greater range
+# [X] run with greater range
 
 if platform.system() == 'Linux':
     plt.switch_backend('agg')

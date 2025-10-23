@@ -14,12 +14,13 @@ import matplotlib.transforms as mtransforms # labeling axes
 # [X] more sigma for old Hamacher --> did not improve figure
 # [X] fit without -80 dB?
 # [X] label figs
-# [ ] NH with 55 dB
+# [ ] NH with 55 dB --> does not seem to be the cause
+# [ ] run all again with new EH files
 
 
 def remove_R(data):
     data['y_soft_RT'] = data['y_soft_RT'][data['dB_list'] > -79]
-    data['y_Hamacher_RT'] = data['y_Hamacher_RT'][data['dB_list'] > -79 ]
+    data['y_Hamacher_RT'] = data['y_Hamacher_RT'][data['dB_list'] > -79]
     data['y_Hamacher_RTmax'] = data['y_Hamacher_RTmax'][data['dB_list'] > -79]
     data['y_soft_RTmax'] = data['y_soft_RTmax'][data['dB_list'] > -79]
     data['dB_list'] = data['dB_list'][data['dB_list'] > -79]
