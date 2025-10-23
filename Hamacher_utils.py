@@ -273,25 +273,28 @@ def  get_Hamacher_IR_from_numpy(fname,
         for fiber in np.arange(spike_times.shape[0]):
             for trial in np.arange(num_trials):
                 latest_list.append(np.max(spike_times[fiber][trial]))
-        sound_duration =  round(np.max(latest_list), 2) #round(np.max(latest_list), int("{:e}".format(new_Fs)[-2:]))
-        # print('Assuming sound duration is 1.0 s')
-    # print(sound_duration)
-    old_Fs = 1/PW
+        sound_duration =  round(np.max(latest_list), 2) 
+        
     new_Fs = 5000
     new_binsize = 1/new_Fs
-    spike_matrix = calculate_bin_spikes(spike_times, binsize=new_binsize, sound_duration=sound_duration)
-    # if unfiltered_type == 'Hamacher':
-        # sigma_samples = 
-        # spike_matrix = gaussian_filter1d
-    _, _, _, _, _, _, _, _, fiber_frequencies, _ = load_mat_virtual_all_thresholds(config['virtual_thresholds_file'], nerve_model_type=3, state=1, array_type =2)
 
+    # match Fs of NH
+    Fs_NH = 1e4
+    binsize_NH = 1/Fs_NH
+    spike_matrix = calculate_bin_spikes(spike_times, binsize=binsize_NH, sound_duration=sound_duration)
+
+    # Gaussian filtering
     for fiber in range(spike_matrix.shape[0]):
-        spike_matrix[fiber,:] = discrete_gaussian_filter(spike_matrix[fiber,:], PW=18e-6)
+        spike_matrix[fiber,:] = discrete_gaussian_filter(spike_matrix[fiber,:], PW=binsize_NH)
+
+    # downsample to 5 kHz
+    ratio = int(Fs_NH/new_Fs)
+    spike_matrix = spike_matrix[:, ::ratio]
 
     SR, _, _, edge_frequency_critical_bands = select_critical_bands(spike_matrix, frequencies, type='entire_band', num_critical_bands=num_critical_bands, number_of_fibers = num_fibers)
     num_remaining_crit_bands, num_samples = SR.shape
         
-    t_unfiltered = np.arange(num_samples)*PW
+    t_unfiltered = np.arange(num_samples)*new_binsize
     T_a = new_binsize # sampling period
     Z = np.zeros(SR.shape)
     Y = np.zeros(SR.shape)
