@@ -164,8 +164,6 @@ if __name__ == "__main__":
 
             try:
                 dB = int(file[file.index(wildcard_dB_start) + len(wildcard_dB_start): file.index(wildcard_dB_end)]) + dB_correction
-                if dB == -15:
-                    breakpoint()
             except: # when R 
                 dB = -80
             dB_list.append(dB)

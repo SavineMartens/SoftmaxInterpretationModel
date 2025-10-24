@@ -16,8 +16,8 @@ import platform
 # [X] more sigma for old Hamacher --> did not improve figure
 # [X] fit without -80 dB?
 # [X] label figs
-# [ ] NH with 55 dB --> does not seem to be the cause - last 3 points for AM
-# [ ] run all again with new EH files
+# [X] NH with 55 dB
+# [ ] run all files again!!
 
 
 
