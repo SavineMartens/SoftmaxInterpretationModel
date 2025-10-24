@@ -20,9 +20,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-test', type=str, default='AM', help='AM or MP')
     parser.add_argument('-hearing', type=str, default='NH', help='NH or EH')
+    parser.add_argument('-NH_dB', type=int, default=65, help="Presentation level for NH")
     args = parser.parse_args()
     test = args.test
     hearing = args.hearing
+    NH_dB = args.NH_dB
     # if on Windows
     if platform.system() == 'Windows':
         dir_to_loop = f'S:/python/SoftmaxInterpretationModel/{test}/{hearing}/IR/'
@@ -36,25 +38,25 @@ if __name__ == "__main__":
 
     if test == 'AM':
         if hearing == 'NH':
-            wildcard_R = f'*unmodulated*reference91*'
-            wildcard_RT_max = f'*modulated*reference91*_0dB*'
-            wildcard_dB_start = '91_'
+            wildcard_R = f'*unmodulated*reference91_{NH_dB}dB*'
+            wildcard_RT_max = f'*modulated*reference91_{NH_dB}dB*'
+            wildcard_dB_start = f'91_{NH_dB}dB_'
             wildcard_dB_end = 'dB_IR'
             num_bands = 24
-            dir_to_loop += 'seed42/'
-            save_dir_results += 'seed42/'
+            dir_to_loop += f'seed42/'
+            save_dir_results += f'seed42/{NH_dB}dB/'
         if hearing == 'EH':
             wildcard_R = f'*unmodulated*reference1*'
             wildcard_RT_max = f'*modulated*reference1*_0dB*'
             wildcard_dB_start = 'reference1_'
             wildcard_dB_end = 'dB_relscale'
-            num_bands = 28
+            num_bands = 24
     if test == 'MP':
         if hearing == 'NH':
-            dir_to_loop += 'seed42/'
-            save_dir_results += 'seed42/'
-            wildcard_R = f'*masker_reference91_65_*'
-            wildcard_RT_max = f'*masker_reference91_65dB_probe_65dB*'
+            dir_to_loop += f'seed42/'
+            save_dir_results += f'seed42/{NH_dB}dB/'
+            wildcard_R = f'*masker_reference91_{NH_dB}dB*'
+            wildcard_RT_max = f'*masker_reference91_{NH_dB}dB_probe_{NH_dB}dB*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_IR'
             num_bands = 24
@@ -89,9 +91,15 @@ if __name__ == "__main__":
         IR_R = IR_R[:min_bands, :]
         IR_RT_max = IR_RT_max[:min_bands, :]
 
+    if NH_dB and hearing == 'NH':
+        dB_sel = f'*91_{NH_dB}*' 
+    else:
+        dB_sel = '*'
+
+
     # S memory in softmax
     S = IR_RT_max - IR_R
-    files = glob.glob(dir_to_loop + f'*{num_fibers}CFs_{num_bands}bands*{TP2_cut_off_Hz}Hz.npy')
+    files = glob.glob(dir_to_loop + dB_sel + f'{num_fibers}CFs_{num_bands}bands*{TP2_cut_off_Hz}Hz.npy')
     if test == 'AM':
         scaling_factor_sigma_list = [1.2, 1.6, 2, 4 ,6 ,8]
     if test == 'MP':
