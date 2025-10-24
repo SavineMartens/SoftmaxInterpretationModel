@@ -44,7 +44,7 @@ if __name__ == "__main__":
     TP2_cut_off_Hz = 500
     num_fibers = 1903# 952
 
-    NH_dB = 65
+    NH_dB = 55
 
     if args.norm:
         norm_bool = True
