@@ -75,7 +75,7 @@ if __name__ == "__main__":
             dir_to_loop += 'seed42/'
             save_dir_figure += f'seed42/{NH_dB}dB/'
             save_dir_results += f'seed42/{NH_dB}dB/'
-            wildcard_R = f'*masker_reference91_{NH_dB}*'
+            wildcard_R = f'*masker_reference91_{NH_dB}dB_IR'
             wildcard_RT_max = f'*masker_reference91_{NH_dB}dB_probe_{NH_dB}dB*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_IR'
@@ -164,6 +164,8 @@ if __name__ == "__main__":
 
             try:
                 dB = int(file[file.index(wildcard_dB_start) + len(wildcard_dB_start): file.index(wildcard_dB_end)]) + dB_correction
+                if dB == -15:
+                    breakpoint()
             except: # when R 
                 dB = -80
             dB_list.append(dB)

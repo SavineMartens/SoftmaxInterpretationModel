@@ -16,7 +16,7 @@ import platform
 # [X] more sigma for old Hamacher --> did not improve figure
 # [X] fit without -80 dB?
 # [X] label figs
-# [ ] NH with 55 dB --> does not seem to be the cause - last 3 points
+# [ ] NH with 55 dB --> does not seem to be the cause - last 3 points for AM
 # [ ] run all again with new EH files
 
 
@@ -34,12 +34,12 @@ def remove_R(data):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Load and plot results for psychometric curve")
-    parser.add_argument("-test", type=str, default="AM", help="Test type (AM or FM)")
+    parser.add_argument("-test", type=str, default="MP", help="Test type (AM or FM)")
     parser.add_argument('-norm', default=False, action='store_true')
     parser.add_argument('-wo_R', default=True, action='store_true')
     parser.add_argument('-sigma', type=float, default=0.2, help="Sigma value for softmax")
     parser.add_argument('-temp', type=float, default=0.243, help="Temperature value for softmax")
-    parser.add_argument('-NH_dB', type=int, default=55, help="Presentation level for NH")
+    parser.add_argument('-NH_dB', type=int, default=65, help="Presentation level for NH")
     args = parser.parse_args()
 
     NH_dB = args.NH_dB
