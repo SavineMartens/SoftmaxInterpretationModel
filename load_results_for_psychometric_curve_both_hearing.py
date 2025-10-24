@@ -39,7 +39,7 @@ if __name__ == "__main__":
     parser.add_argument('-wo_R', default=True, action='store_true')
     parser.add_argument('-sigma', type=float, default=0.2, help="Sigma value for softmax")
     parser.add_argument('-temp', type=float, default=0.243, help="Temperature value for softmax")
-    parser.add_argument('NH_dB', type=int, default=65, help="Presentation level for NH")
+    parser.add_argument('NH_dB', type=int, default=55, help="Presentation level for NH")
     args = parser.parse_args()
 
     NH_dB = args.NH_dB
@@ -74,6 +74,8 @@ if __name__ == "__main__":
     else:# try:
         folder_results_NH = f'S:/python/SoftmaxInterpretationModel/output/{test}/NH/results/seed42/{NH_dB}dB/' 
         folder_results_EH = f'S:/python/SoftmaxInterpretationModel/output/{test}/EH/results/'
+        fixed_sigma = 0.081
+        fixed_temp = 0.027
 
 
     all_files_NH = sorted(glob.glob(os.path.join(folder_results_NH, f'*norm*{norm_bool}.npy')))
@@ -100,8 +102,7 @@ if __name__ == "__main__":
         test_str = 'Masker Probe'
         desired_sigma_values = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
         desired_temp_values = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
-        # fixed_sigma = 0.081
-        # fixed_temp = 0.027
+
         x_label = 'Probe dB re masker'
 
     for file in all_files_NH:
