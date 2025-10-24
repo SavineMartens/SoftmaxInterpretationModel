@@ -39,7 +39,7 @@ if __name__ == "__main__":
     parser.add_argument('-wo_R', default=True, action='store_true')
     parser.add_argument('-sigma', type=float, default=0.2, help="Sigma value for softmax")
     parser.add_argument('-temp', type=float, default=0.243, help="Temperature value for softmax")
-    parser.add_argument('NH_dB', type=int, default=55, help="Presentation level for NH")
+    parser.add_argument('-NH_dB', type=int, default=55, help="Presentation level for NH")
     args = parser.parse_args()
 
     NH_dB = args.NH_dB
