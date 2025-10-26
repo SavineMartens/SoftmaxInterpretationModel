@@ -72,7 +72,7 @@ if __name__ == "__main__":
     print(f'Running {test} for {hearing}')
 
     if hearing == 'NH' and test == 'MP':
-        dB_correction = -65
+        dB_correction = -NH_dB
     else:
         dB_correction = 0
 
