@@ -38,34 +38,31 @@ if __name__ == "__main__":
 
     if test == 'AM':
         if hearing == 'NH':
-            wildcard_R = f'*unmodulated*reference91_{NH_dB}dB*'
-            wildcard_RT_max = f'*modulated*reference91_{NH_dB}dB*'
+            wildcard_R = f'*unmodulated*reference91_{NH_dB}*'
+            wildcard_RT_max = f'*modulated*reference91_{NH_dB}*_0dB*'
             wildcard_dB_start = f'91_{NH_dB}dB_'
             wildcard_dB_end = 'dB_IR'
-            num_bands = 24
-            dir_to_loop += f'seed42/'
+            dir_to_loop += 'seed42/'
             save_dir_results += f'seed42/{NH_dB}dB/'
         if hearing == 'EH':
             wildcard_R = f'*unmodulated*reference1*'
             wildcard_RT_max = f'*modulated*reference1*_0dB*'
             wildcard_dB_start = 'reference1_'
             wildcard_dB_end = 'dB_relscale'
-            num_bands = 24
     if test == 'MP':
         if hearing == 'NH':
-            dir_to_loop += f'seed42/'
+            dir_to_loop += 'seed42/'
+            save_dir_figure += f'seed42/{NH_dB}dB/'
             save_dir_results += f'seed42/{NH_dB}dB/'
-            wildcard_R = f'*masker_reference91_{NH_dB}dB*'
+            wildcard_R = f'*masker_reference91_{NH_dB}dB_IR'
             wildcard_RT_max = f'*masker_reference91_{NH_dB}dB_probe_{NH_dB}dB*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_IR'
-            num_bands = 24
         if hearing == 'EH':
             wildcard_R = f'*masker_reference1_rel*'
             wildcard_RT_max = f'*masker_reference1_*probe_0*'
             wildcard_dB_start = 'probe_'
             wildcard_dB_end = 'dB_relscale'
-            num_bands = 24
     
     save_dir_results += 'Hamacher_only/'
 
@@ -75,6 +72,8 @@ if __name__ == "__main__":
         dB_correction = -NH_dB
     else:
         dB_correction = 0
+
+    num_bands = 24
 
     # get R and RT_max
     R_name = glob.glob(os.path.join(dir_to_loop, wildcard_R + f'*{num_fibers}CFs*{TP2_cut_off_Hz}Hz.npy'))[0]
@@ -91,11 +90,15 @@ if __name__ == "__main__":
         IR_R = IR_R[:min_bands, :]
         IR_RT_max = IR_RT_max[:min_bands, :]
 
+    if hearing == 'NH' and test == 'MP':
+        dB_correction = -1*NH_dB
+    else:
+        dB_correction = 0
+
     if NH_dB and hearing == 'NH':
         dB_sel = f'*91_{NH_dB}*' 
     else:
         dB_sel = '*'
-
 
     # S memory in softmax
     S = IR_RT_max - IR_R
