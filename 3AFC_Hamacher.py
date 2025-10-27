@@ -160,13 +160,13 @@ if __name__ == "__main__":
             sorted_y_Hamacher_RTmax = percentage_correct_Hamacher_RTmax_matrix[np.array(dB_list).argsort()]*100
 
 
-            # saving data to dictionary
-            data_dict = dict()
-            data_dict.update({"dB_list": sorted_x,
-                              "y_Hamacher_RT": sorted_y_Hamacher,
-                              "y_Hamacher_RTmax": sorted_y_Hamacher_RTmax,
-                              "sigma_SF": scaling_factor_sigma})
-            np.save(save_dir_results + '/3AFC_sigmaSF_' + str(scaling_factor_sigma) + '.npy', data_dict)
+        # saving data to dictionary
+        data_dict = dict()
+        data_dict.update({"dB_list": sorted_x,
+                            "y_Hamacher_RT": sorted_y_Hamacher,
+                            "y_Hamacher_RTmax": sorted_y_Hamacher_RTmax,
+                            "sigma_SF": scaling_factor_sigma})
+        np.save(save_dir_results + '/3AFC_sigmaSF_' + str(scaling_factor_sigma) + '.npy', data_dict)
 
 
     plt.show()
