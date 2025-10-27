@@ -363,49 +363,44 @@ if __name__ == "__main__":
 #     plt.suptitle(f'Softmax Psychometric Curves - {test_str},\n comparing RT vs RT$_{{max}}$ with T={fixed_temp} and σ={fixed_sigma}', fontsize=16)
 #     figCompRTvsRTmax.savefig(f'{output_dir}Softmax_Comparison_RT_vs_RTmax_temp_{fixed_temp}_sigma_{fixed_sigma}_norm_{norm_bool}{wo_R_str}.png')
 
-    # comparing 55dB vs 65 dB NH for softmax RTmax
-    fig_compare_55_vs_65dB, axes = plt.subplots(1, 2, figsize=(10, 6), sharex=True, sharey=True)
-    plt.subplots_adjust(wspace=0.13, top=0.86)
-    # NH 55 dB
-    if platform.system() == 'Linux':
-        folder_55dB = f'./output/{test}/NH/results/seed42/55dB/'  
-        folder_65dB = f'./output/{test}/NH/results/seed42/65dB/'
-    else:
-        folder_55dB = f'S:/python/SoftmaxInterpretationModel/output/{test}/NH/results/seed42/55dB/'  
-        folder_65dB = f'S:/python/SoftmaxInterpretationModel/output/{test}/NH/results/seed42/65dB/'
-    all_files_NH_55dB = sorted(glob.glob(os.path.join(folder_55dB, f'*norm*{norm_bool}.npy')))
-    all_files_NH_65dB = sorted(glob.glob(os.path.join(folder_65dB, f'*norm*{norm_bool}.npy')))
-    for file in all_files_NH_55dB:
-        if f'sigmaSF_{fixed_sigma}_temp_{fixed_temp}_' in file:
-            print(file)
-            data_NH_55dB = np.load(file, allow_pickle=True).item()
-            if wo_R: # remove -80 dB and y_val
-                data_NH_55dB = remove_R(data_NH_55dB)
-            axes[0].scatter(data_NH_55dB['dB_list'], data_NH_55dB['y_soft_RTmax'], label='NH 55 dB', color='green')
-            axes[0].plot(data_NH_55dB['dB_list'], fit_best_sigmoid(data_NH_55dB['dB_list'], data_NH_55dB['y_soft_RTmax']), color='green')
-            axes[0].set_title(f'NH 55 dB', fontsize=14)
-    # NH 65 dB
-    for file in all_files_NH_65dB:
-        if f'sigmaSF_{fixed_sigma}_temp_{fixed_temp}_' in file:
-            print(file)
-            data_NH_65dB = np.load(file, allow_pickle=True).item()
-            if wo_R: # remove -80 dB and y_val
-                data_NH_65dB = remove_R(data_NH_65dB)
-            axes[1].scatter(data_NH_65dB['dB_list'], data_NH_65dB['y_soft_RTmax'], label='NH 65 dB', color='blue')
-            axes[1].plot(data_NH_65dB['dB_list'], fit_best_sigmoid(data_NH_65dB['dB_list'], data_NH_65dB['y_soft_RTmax']), color='blue')
-            axes[1].set_title(f'NH 65 dB', fontsize=14)
-    trans = mtransforms.ScaledTranslation(10/72, -5/72, fig_compare_55_vs_65dB.dpi_scale_trans)
-    for a, ax in enumerate(axes.flatten()):
-        ax.set_xlabel(x_label, fontsize=14)
-        ax.set_ylabel('Percentage correct [%]',fontsize=14)
-        ax.set_ylim((25, 101))
-        ax.set_xlim((min(data_NH_55dB['dB_list']), max(data_NH_55dB['dB_list'])))
-        ax.legend(loc='upper left')
-        ax.grid(color='lightgray')
-        ax.text(x_pos, y_pos, letters[a], transform=ax.transAxes + trans,
-            fontsize=16, verticalalignment='top', color='black')
-    plt.suptitle(f'Softmax RT$_{{max}}$ Psychometric Curves - {test_str},\n comparing NH 55 dB vs NH 65 dB with T={fixed_temp} and σ={fixed_sigma}', fontsize=16)
-    fig_compare_55_vs_65dB.savefig(f'{output_dir}Softmax_RTmax_Psychometric_Curves_compare_55dB_vs_65dB_temp_{fixed_temp}_sigma_{fixed_sigma}_norm_{norm_bool}{wo_R_str}.png')
+    # # comparing 55dB vs 65 dB NH for softmax RTmax
+    # fig_compare_55_vs_65dB = plt.figure(figsize=(8,8))
+    # # NH 55 dB
+    # if platform.system() == 'Linux':
+    #     folder_55dB = f'./output/{test}/NH/results/seed42/55dB/'  
+    #     folder_65dB = f'./output/{test}/NH/results/seed42/65dB/'
+    # else:
+    #     folder_55dB = f'S:/python/SoftmaxInterpretationModel/output/{test}/NH/results/seed42/55dB/'  
+    #     folder_65dB = f'S:/python/SoftmaxInterpretationModel/output/{test}/NH/results/seed42/65dB/'
+    # all_files_NH_55dB = sorted(glob.glob(os.path.join(folder_55dB, f'*norm*{norm_bool}.npy')))
+    # all_files_NH_65dB = sorted(glob.glob(os.path.join(folder_65dB, f'*norm*{norm_bool}.npy')))
+    # for file in all_files_NH_55dB:
+    #     if f'sigmaSF_{fixed_sigma}_temp_{fixed_temp}_' in file:
+    #         print(file)
+    #         data_NH_55dB = np.load(file, allow_pickle=True).item()
+    #         if wo_R: # remove -80 dB and y_val
+    #             data_NH_55dB = remove_R(data_NH_55dB)
+    #         plt.scatter(data_NH_55dB['dB_list'], data_NH_55dB['y_soft_RTmax'], label='NH 55 dB', color='green')
+    #         plt.plot(data_NH_55dB['dB_list'], fit_best_sigmoid(data_NH_55dB['dB_list'], data_NH_55dB['y_soft_RTmax']), color='green')
+    #         # plt.set_title(f'NH 55 dB', fontsize=14)
+    # # NH 65 dB
+    # for file in all_files_NH_65dB:
+    #     if f'sigmaSF_{fixed_sigma}_temp_{fixed_temp}_' in file:
+    #         print(file)
+    #         data_NH_65dB = np.load(file, allow_pickle=True).item()
+    #         if wo_R: # remove -80 dB and y_val
+    #             data_NH_65dB = remove_R(data_NH_65dB)
+    #         plt.scatter(data_NH_65dB['dB_list'], data_NH_65dB['y_soft_RTmax'], label='NH 65 dB', color='blue')
+    #         plt.plot(data_NH_65dB['dB_list'], fit_best_sigmoid(data_NH_65dB['dB_list'], data_NH_65dB['y_soft_RTmax']), color='blue')
+    #         # plt.set_title(f'NH 65 dB', fontsize=14)
+    # plt.xlabel(x_label, fontsize=14)
+    # plt.ylabel('Percentage correct [%]',fontsize=14)
+    # plt.ylim((25, 101))
+    # plt.xlim((min(data_NH_55dB['dB_list']), max(data_NH_55dB['dB_list'])))
+    # plt.legend(loc='upper left')
+    # plt.grid(color='lightgray')
+    # plt.title(f'Softmax RT$_{{max}}$ Psychometric Curves - {test_str},\n comparing NH 55 dB vs NH 65 dB with T={fixed_temp} and σ={fixed_sigma}', fontsize=16)
+    # fig_compare_55_vs_65dB.savefig(f'{output_dir}Softmax_RTmax_Psychometric_Curves_compare_55dB_vs_65dB_temp_{fixed_temp}_sigma_{fixed_sigma}_norm_{norm_bool}{wo_R_str}.png')
 
     if test == 'AM':
         sigma_list_EH = np.array([0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.4, 0.6, 0.8])
@@ -427,17 +422,20 @@ if __name__ == "__main__":
                 if f'sigmaSF_{sigma}.' in file:
                     print(file)
                     data_NH = np.load(file, allow_pickle=True).item()
+                    print(data_NH['y_Hamacher_RT'])
                     if wo_R: # remove -80 dB and y_val
                         data_NH = remove_R(data_NH)
                     axes[0].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_list_NH == sigma)[0][0]])
                     axes[0].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_Hamacher_RT']), color=colors_sigma[np.where(sigma_list_NH == sigma)[0][0]])
                     axes[0].set_title(f'NH')    
         for sigma in sigma_list_EH:
+            print(sigma)
         # EH
             for f, file in enumerate(all_files_EH):
                 if f'sigmaSF_{sigma}.' in file:
                     print(file)
                     data_EH = np.load(file, allow_pickle=True).item()
+                    print(data_EH['y_Hamacher_RT'])
                     if wo_R: # remove -80 dB and y_val
                         data_EH = remove_R(data_EH)
                     axes[1].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_list_EH == sigma)[0][0]])
@@ -446,8 +444,8 @@ if __name__ == "__main__":
         for ax in axes:
             ax.set_xlabel(x_label, fontsize=14)
             ax.set_ylabel('Percentage correct [%]',fontsize=14)
-            # ax.set_ylim((30, 101))
-            ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
+            ax.set_ylim((30, 101))
+            ax.set_xlim((min(data_EH['dB_list']), max(data_EH['dB_list'])))
             ax.legend() 
         plt.suptitle(f'Hamacher Psychometric Curves - {test_str}', fontsize=16)
         figHamRTfull.savefig(f'./output/{test}/Hamacher_RT_Psychometric_Curves_sigma_NH{sigma_list_NH}_{NH_dB}dB_EH{sigma_list_EH}.png')
