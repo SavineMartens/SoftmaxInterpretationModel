@@ -103,7 +103,7 @@ if __name__ == "__main__":
     S = IR_RT_max - IR_R
     files = glob.glob(dir_to_loop + dB_sel + f'{num_fibers}CFs_{num_bands}bands*{TP2_cut_off_Hz}Hz.npy')
     if test == 'AM':
-        scaling_factor_sigma_list = [0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.4, 0.6, 0.8, 1.2, 1.6, 2, 4 ,6 ,8]
+        scaling_factor_sigma_list = [ 1.6, 2, 4 ,6 ,8] # 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.4, 0.6, 0.8, 1.2,
     if test == 'MP':
         scaling_factor_sigma_list = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
 

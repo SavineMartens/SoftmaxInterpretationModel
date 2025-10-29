@@ -422,7 +422,7 @@ if __name__ == "__main__":
                 if f'sigmaSF_{sigma}.' in file:
                     print(file)
                     data_NH = np.load(file, allow_pickle=True).item()
-                    print(data_NH['y_Hamacher_RT'])
+                    # print(data_NH['y_Hamacher_RT'])
                     if wo_R: # remove -80 dB and y_val
                         data_NH = remove_R(data_NH)
                     axes[0].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_list_NH == sigma)[0][0]])
@@ -433,7 +433,7 @@ if __name__ == "__main__":
         # EH
             for f, file in enumerate(all_files_EH):
                 if f'sigmaSF_{sigma}.' in file:
-                    print(file)
+                    # print(file)
                     data_EH = np.load(file, allow_pickle=True).item()
                     print(data_EH['y_Hamacher_RT'])
                     if wo_R: # remove -80 dB and y_val
@@ -450,49 +450,49 @@ if __name__ == "__main__":
         plt.suptitle(f'Hamacher Psychometric Curves - {test_str}', fontsize=16)
         figHamRTfull.savefig(f'./output/{test}/Hamacher_RT_Psychometric_Curves_sigma_NH{sigma_list_NH}_{NH_dB}dB_EH{sigma_list_EH}.png')
 
-    # # Hamacher figure RT vs RTmax for varying sigma --> ran it incorrectly, so commented out
-    # figHamRT_vs_RTmax, axes = plt.subplots(2, 2, figsize=(15, 10), sharex=True, sharey=True)
-    # axes = axes.flatten()
-    # # NH subplot 1 en 2
-    # for sigma in desired_sigma_values:
-    #     for file in all_files_NH:
-    #         if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
-    #             print(file)
-    #             data_NH = np.load(file, allow_pickle=True).item()
-    #             if wo_R: # remove -80 dB and y_val
-    #                 data_NH = remove_R(data_NH)
-    #             axes[0].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #             axes[0].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_Hamacher_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #             axes[0].set_title(f'NH RT')
-    #             axes[0].legend()
-    #             axes[1].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RTmax'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #             axes[1].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_Hamacher_RTmax']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #             axes[1].set_title(f'NH RTmax')
-    #             axes[1].legend()
-    # # EH subplot 3 en 4
-    #     for file in all_files_EH:
-    #         if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
-    #             print(file)
-    #             data_EH = np.load(file, allow_pickle=True).item()
-    #             if wo_R: # remove -80 dB and y_val
-    #                 data_EH = remove_R(data_EH)
-    #             axes[2].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #             axes[2].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_Hamacher_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #             axes[2].set_title(f'EH - RT')
-    #             axes[3].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RTmax'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-    #             axes[3].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_Hamacher_RTmax']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])    
-    #             axes[3].set_title(f'EH - RTmax')
-    # trans = mtransforms.ScaledTranslation(10/72, -5/72, figHamRT_vs_RTmax.dpi_scale_trans)
-    # for a, ax in enumerate(axes.flatten()):
-    #     ax.set_xlabel(x_label, fontsize=14)
-    #     ax.set_ylabel('Percentage correct [%]',fontsize=14)
-    #     ax.set_ylim((25, 101))
-    #     ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
-    #     ax.legend()
-    #     ax.text(x_pos, y_pos, letters[a], transform=ax.transAxes + trans,
-    #         fontsize=16, verticalalignment='top', color='black')
-    # plt.suptitle(f'Hamacher Psychometric Curves - {test_str}, comparing RT vs RTmax', fontsize=16)
-    # figHamRT_vs_RTmax.savefig(f'{output_dir}Hamacher_RT_vs_RTmax_Psychometric_Curves_sigma{desired_sigma_values}{wo_R_str}.png')
+    # Hamacher figure RT vs RTmax for varying sigma --> ran it incorrectly, so commented out
+    figHamRT_vs_RTmax, axes = plt.subplots(2, 2, figsize=(15, 10), sharex=True, sharey=True)
+    axes = axes.flatten()
+    # NH subplot 1 en 2
+    for sigma in desired_sigma_values:
+        for file in all_files_NH:
+            if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
+                print(file)
+                data_NH = np.load(file, allow_pickle=True).item()
+                if wo_R: # remove -80 dB and y_val
+                    data_NH = remove_R(data_NH)
+                axes[0].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                axes[0].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_Hamacher_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                axes[0].set_title(f'NH RT')
+                axes[0].legend()
+                axes[1].scatter(data_NH['dB_list'], data_NH['y_Hamacher_RTmax'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                axes[1].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_Hamacher_RTmax']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                axes[1].set_title(f'NH RTmax')
+                axes[1].legend()
+    # EH subplot 3 en 4
+        for file in all_files_EH:
+            if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
+                print(file)
+                data_EH = np.load(file, allow_pickle=True).item()
+                if wo_R: # remove -80 dB and y_val
+                    data_EH = remove_R(data_EH)
+                axes[2].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RT'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                axes[2].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_Hamacher_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                axes[2].set_title(f'EH - RT')
+                axes[3].scatter(data_EH['dB_list'], data_EH['y_Hamacher_RTmax'], label=f'sigma={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+                axes[3].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_Hamacher_RTmax']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])    
+                axes[3].set_title(f'EH - RTmax')
+    trans = mtransforms.ScaledTranslation(10/72, -5/72, figHamRT_vs_RTmax.dpi_scale_trans)
+    for a, ax in enumerate(axes.flatten()):
+        ax.set_xlabel(x_label, fontsize=14)
+        ax.set_ylabel('Percentage correct [%]',fontsize=14)
+        ax.set_ylim((25, 101))
+        ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
+        ax.legend()
+        ax.text(x_pos, y_pos, letters[a], transform=ax.transAxes + trans,
+            fontsize=16, verticalalignment='top', color='black')
+    plt.suptitle(f'Hamacher Psychometric Curves - {test_str}, comparing RT vs RTmax', fontsize=16)
+    figHamRT_vs_RTmax.savefig(f'{output_dir}Hamacher_RT_vs_RTmax_Psychometric_Curves_sigma{desired_sigma_values}{wo_R_str}.png')
 
 
     plt.show()
