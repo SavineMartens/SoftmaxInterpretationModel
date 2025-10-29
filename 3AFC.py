@@ -33,6 +33,8 @@ if __name__ == "__main__":
     parser.add_argument('-test', type=str, default='MP', help='AM or MP')
     parser.add_argument('-hearing', type=str, default='NH', help='NH or EH')
     parser.add_argument('-norm', default=False, action='store_true')
+    parser.add_argument('-sigma', type=float, default=None, help='scaling factor sigma, if None, loop over all sigma_values')
+    parser.add_argument('-temp', type=float, default=None, help='temperature value, if None, loop over all temperature_values')
     args = parser.parse_args()
     test = args.test
     hearing = args.hearing
@@ -119,12 +121,21 @@ if __name__ == "__main__":
     S = IR_RT_max - IR_R
     files = glob.glob(dir_to_loop + dB_sel + f'{num_fibers}CFs_{num_bands}bands*{TP2_cut_off_Hz}Hz.npy')
 
-    if test == 'AM':
-        scaling_factor_sigma_list = [0.02, 0.04, 0.06, 0.08, 0.2, 0.4, 0.6, 0.8]
-        temperature_list =  [0.009, 0.027, 0.081, 0.162, 0.243, 0.486, 0.729, 2.187, 6.561]#[0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
-    if test == 'MP':
-        scaling_factor_sigma_list = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
-        temperature_list =  [0.009, 0.027, 0.081, 0.162, 0.243, 0.486, 0.729, 2.187, 6.561] #[0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
+
+    if args.sigma is not None:
+        scaling_factor_sigma_list = [args.sigma]
+    else:
+        if test == 'AM':
+            scaling_factor_sigma_list = [0.02, 0.04, 0.06, 0.08, 0.2, 0.4, 0.6, 0.8]
+        if test == 'MP':
+            scaling_factor_sigma_list = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
+    if args.temp is not None:
+        temperature_list = [args.temp]
+    else:
+        if test == 'AM':
+            temperature_list =  [0.009, 0.027, 0.081, 0.162, 0.243, 0.486, 0.729, 2.187, 6.561]#[0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
+        if test == 'MP':
+            temperature_list =  [0.009, 0.027, 0.081, 0.162, 0.243, 0.486, 0.729, 2.187, 6.561] #[0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
 
     # create color map
     color_map_temperature = plt.get_cmap('viridis', len(temperature_list))
