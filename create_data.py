@@ -149,7 +149,8 @@ def process_normal_hearing(test, create_files=False, plot_files=True, TP2_cut_of
 
 
 
-    sound_files = sorted(glob.glob(f'./sounds/{test}/*reference91_55dB*_{dB_str}.wav'))  #
+    # sound_files = sorted(glob.glob(f'./sounds/{test}/*reference91_55dB*_{dB_str}.wav'))  #
+    sound_files = sorted(glob.glob(f'/exports/kno-shark/users/Savine/Matlab/BEZ2018model/Sounds/Experiment2BruceReference91/masker_{dB_str}*.wav')) 
     print(f'Found {len(sound_files)} sound files for NH.')
 
 

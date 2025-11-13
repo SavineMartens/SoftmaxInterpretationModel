@@ -37,9 +37,9 @@ def remove_R(data):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Load and plot results for psychometric curve")
-    parser.add_argument("-test", type=str, default="MP", help="Test type (AM or FM)")
+    parser.add_argument("-test", type=str, default="AM", help="Test type (AM or FM)")
     parser.add_argument('-norm', default=False, action='store_true')
-    parser.add_argument('-wo_R', default=False, action='store_true')
+    parser.add_argument('-wo_R', default=True, action='store_true')
     parser.add_argument('-sigma', type=float, default=0.2, help="Sigma value for softmax")
     parser.add_argument('-temp', type=float, default=0.243, help="Temperature value for softmax")
     parser.add_argument('-NH_dB', type=int, default=65, help="Presentation level for NH")
@@ -109,7 +109,6 @@ if __name__ == "__main__":
         test_str = 'Masker Probe'
         desired_sigma_values = [0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
         desired_temp_values = [0.009, 0.027, 0.081, 0.162, 0.243, 0.486, 0.729, 2.187, 6.561] #[0.001, 0.003, 0.009, 0.027, 0.081, 0.243, 0.729, 2.187, 6.561]
-
         x_label = 'Probe dB re masker'
 
     for file in all_files_NH:
@@ -162,6 +161,7 @@ if __name__ == "__main__":
                 axes[0,0].scatter(data_EH['dB_list'], data_EH['y_soft_RTmax'], label=f'T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
                 axes[0,0].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RTmax']), color=colors_temp[np.where(temp_values == temp)[0][0]])
                 axes[0,0].set_title(f'EH: fixed σ={fixed_sigma}', fontsize=14)
+                # axes[0,0].legend(ncol=2)
 
     # subplot 2: fixed temp EH
     for sigma in desired_sigma_values:
@@ -175,6 +175,7 @@ if __name__ == "__main__":
                 axes[0,1].scatter(data_EH['dB_list'], data_EH['y_soft_RTmax'], label=f'σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[0,1].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RTmax']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
                 axes[0,1].set_title(f'EH: fixed T={fixed_temp}', fontsize=14)
+                # axes[0,1].legend(ncol=2)
     # subplot 3: fixed sigma NH
     for temp in desired_temp_values:
         for file in all_files_NH:
@@ -207,7 +208,12 @@ if __name__ == "__main__":
         ax.set_ylabel('Percentage correct [%]',fontsize=14)
         ax.set_ylim((25, 101))
         ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
-        ax.legend(loc='upper left')
+        if ax == axes[0,0] or ax == axes[0,1] and test == 'MP':
+            ax.legend(loc='upper left', ncol=2)
+        elif ax == axes[0,0] or ax == axes[1,0] and test == 'AM':
+            ax.legend(loc='upper left', ncol=2)
+        else:
+            ax.legend(loc='upper left')
         ax.grid(color='lightgray')
         ax.text(x_pos, y_pos+0.02, letters[a], transform=ax.transAxes + trans,
             fontsize=16, verticalalignment='top', color='black')
@@ -215,74 +221,74 @@ if __name__ == "__main__":
     figSoftRTmax.savefig(f'{output_dir}Softmax_RTmax_Psychometric_Curves_temp_{fixed_temp}_sigma_{fixed_sigma}_norm_{norm_bool}{wo_R_str}.png')
 
 
-  # figure 4 subplots: softmax RT varying temp, fixed sigma, NH vs EH
-    figSoftRT, axes = plt.subplots(2, 2, figsize=(15, 9), sharex=True, sharey=True)
-    plt.subplots_adjust(wspace=0.076, bottom=0.07, top=0.914)
-    # subplot 1: fixed sigma EH
-    for temp in desired_temp_values:
-        for file in all_files_EH:
-            if f'temp_{temp}_' in file and f'sigmaSF_{fixed_sigma}_' in file:
-                print(file)
-                data_EH = np.load(file, allow_pickle=True).item()
-                if wo_R: # remove -80 dB and y_val
-                    data_EH = remove_R(data_EH)
-                sigma = data_EH['sigma_SF']
-                axes[0,0].scatter(data_EH['dB_list'], data_EH['y_soft_RT'], label=f'T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
-                fit = fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RT'])
-                axes[0,0].plot(data_EH['dB_list'], fit, color=colors_temp[np.where(temp_values == temp)[0][0]])
-                axes[0,0].set_title(f'EH: fixed σ={fixed_sigma}', fontsize=14)
+#   # figure 4 subplots: softmax RT varying temp, fixed sigma, NH vs EH
+#     figSoftRT, axes = plt.subplots(2, 2, figsize=(15, 9), sharex=True, sharey=True)
+#     plt.subplots_adjust(wspace=0.076, bottom=0.07, top=0.914)
+#     # subplot 1: fixed sigma EH
+#     for temp in desired_temp_values:
+#         for file in all_files_EH:
+#             if f'temp_{temp}_' in file and f'sigmaSF_{fixed_sigma}_' in file:
+#                 print(file)
+#                 data_EH = np.load(file, allow_pickle=True).item()
+#                 if wo_R: # remove -80 dB and y_val
+#                     data_EH = remove_R(data_EH)
+#                 sigma = data_EH['sigma_SF']
+#                 axes[0,0].scatter(data_EH['dB_list'], data_EH['y_soft_RT'], label=f'T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
+#                 fit = fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RT'])
+#                 axes[0,0].plot(data_EH['dB_list'], fit, color=colors_temp[np.where(temp_values == temp)[0][0]])
+#                 axes[0,0].set_title(f'EH: fixed σ={fixed_sigma}', fontsize=14)
 
-    # subplot 2: fixed temp EH
-    for sigma in desired_sigma_values:
-        for file in all_files_EH:
-            if f'temp_{fixed_temp}_' in file and f'sigmaSF_{sigma}_' in file:
-                print(file)
-                data_EH = np.load(file, allow_pickle=True).item()
-                if wo_R: # remove -80 dB and y_val
-                    data_EH = remove_R(data_EH)
-                sigma = data_EH['sigma_SF']
-                axes[0,1].scatter(data_EH['dB_list'], data_EH['y_soft_RT'], label=f'σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[0,1].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[0,1].set_title(f'EH: fixed T={fixed_temp}', fontsize=14)
+#     # subplot 2: fixed temp EH
+#     for sigma in desired_sigma_values:
+#         for file in all_files_EH:
+#             if f'temp_{fixed_temp}_' in file and f'sigmaSF_{sigma}_' in file:
+#                 print(file)
+#                 data_EH = np.load(file, allow_pickle=True).item()
+#                 if wo_R: # remove -80 dB and y_val
+#                     data_EH = remove_R(data_EH)
+#                 sigma = data_EH['sigma_SF']
+#                 axes[0,1].scatter(data_EH['dB_list'], data_EH['y_soft_RT'], label=f'σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+#                 axes[0,1].plot(data_EH['dB_list'], fit_best_sigmoid(data_EH['dB_list'], data_EH['y_soft_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+#                 axes[0,1].set_title(f'EH: fixed T={fixed_temp}', fontsize=14)
 
-    # subplot 3: fixed sigma NH
-    for temp in desired_temp_values:
-        for file in all_files_NH:
-            if f'sigmaSF_{fixed_sigma}_' in file and f'temp_{temp}_' in file:
-                print(file)
-                data_NH = np.load(file, allow_pickle=True).item()
-                if wo_R: # remove -80 dB and y_val
-                    data_NH = remove_R(data_NH)
-                temp = data_NH['temperature']
-                axes[1,0].scatter(data_NH['dB_list'], data_NH['y_soft_RT'], label=f'T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
-                axes[1,0].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_soft_RT']), color=colors_temp[np.where(temp_values == temp)[0][0]])
-                axes[1,0].set_title(f'NH: fixed σ={fixed_sigma}', fontsize=14)
+#     # subplot 3: fixed sigma NH
+#     for temp in desired_temp_values:
+#         for file in all_files_NH:
+#             if f'sigmaSF_{fixed_sigma}_' in file and f'temp_{temp}_' in file:
+#                 print(file)
+#                 data_NH = np.load(file, allow_pickle=True).item()
+#                 if wo_R: # remove -80 dB and y_val
+#                     data_NH = remove_R(data_NH)
+#                 temp = data_NH['temperature']
+#                 axes[1,0].scatter(data_NH['dB_list'], data_NH['y_soft_RT'], label=f'T={temp}', color=colors_temp[np.where(temp_values == temp)[0][0]])
+#                 axes[1,0].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_soft_RT']), color=colors_temp[np.where(temp_values == temp)[0][0]])
+#                 axes[1,0].set_title(f'NH: fixed σ={fixed_sigma}', fontsize=14)
 
-    # subplot 4: fixed temp NH
-    for sigma in desired_sigma_values:
-        for file in all_files_NH:
-            if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
-                print(file)
-                data_NH = np.load(file, allow_pickle=True).item()
-                if wo_R: # remove -80 dB and y_val
-                    data_NH = remove_R(data_NH)
-                temp = data_NH['temperature']
-                axes[1,1].scatter(data_NH['dB_list'], data_NH['y_soft_RT'], label=f'σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[1,1].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_soft_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
-                axes[1,1].set_title(f'NH: fixed T={fixed_temp}', fontsize=14)
+#     # subplot 4: fixed temp NH
+#     for sigma in desired_sigma_values:
+#         for file in all_files_NH:
+#             if f'sigmaSF_{sigma}_' in file and f'temp_{fixed_temp}_' in file:
+#                 print(file)
+#                 data_NH = np.load(file, allow_pickle=True).item()
+#                 if wo_R: # remove -80 dB and y_val
+#                     data_NH = remove_R(data_NH)
+#                 temp = data_NH['temperature']
+#                 axes[1,1].scatter(data_NH['dB_list'], data_NH['y_soft_RT'], label=f'σ={sigma}', color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+#                 axes[1,1].plot(data_NH['dB_list'], fit_best_sigmoid(data_NH['dB_list'], data_NH['y_soft_RT']), color=colors_sigma[np.where(sigma_values == sigma)[0][0]])
+#                 axes[1,1].set_title(f'NH: fixed T={fixed_temp}', fontsize=14)
 
-    trans = mtransforms.ScaledTranslation(10/72, -5/72, figSoftRT.dpi_scale_trans)
-    for a, ax in enumerate(axes.flatten()):
-        ax.set_xlabel(x_label, fontsize=14)
-        ax.set_ylabel('Percentage correct [%]',fontsize=14)
-        ax.set_ylim((25, 101))
-        ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
-        ax.legend(loc='upper left')
-        ax.grid(color='lightgray')
-        ax.text(x_pos, y_pos+0.02, letters[a], transform=ax.transAxes + trans,
-            fontsize=16, verticalalignment='top', color='black')
-    plt.suptitle(f'Softmax RT Psychometric Curves - {test_str}', fontsize=16)
-    figSoftRT.savefig(f'{output_dir}Softmax_RT_Psychometric_Curves_temp_{fixed_temp}_sigma_{fixed_sigma}_norm_{norm_bool}{wo_R_str}.png')
+#     trans = mtransforms.ScaledTranslation(10/72, -5/72, figSoftRT.dpi_scale_trans)
+#     for a, ax in enumerate(axes.flatten()):
+#         ax.set_xlabel(x_label, fontsize=14)
+#         ax.set_ylabel('Percentage correct [%]',fontsize=14)
+#         ax.set_ylim((25, 101))
+#         ax.set_xlim((min(data_NH['dB_list']), max(data_NH['dB_list'])))
+#         ax.legend(loc='upper left')
+#         ax.grid(color='lightgray')
+#         ax.text(x_pos, y_pos+0.02, letters[a], transform=ax.transAxes + trans,
+#             fontsize=16, verticalalignment='top', color='black')
+#     plt.suptitle(f'Softmax RT Psychometric Curves - {test_str}', fontsize=16)
+#     figSoftRT.savefig(f'{output_dir}Softmax_RT_Psychometric_Curves_temp_{fixed_temp}_sigma_{fixed_sigma}_norm_{norm_bool}{wo_R_str}.png')
 
 
     # Hamacher RT: NH vs EH loop over sigma
